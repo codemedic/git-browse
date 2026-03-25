@@ -255,3 +255,31 @@ html[data-theme="dark"] .ft-file-link:hover   { background: #21262d; }
 html[data-theme="dark"] .ft-file-link.ft-active { background: #1c2d40; color: #58a6ff; }
 html[data-theme="dark"] .ft-spinner           { color: #8b949e; }
 html[data-theme="dark"] #filetree-open-btn    { background: rgba(22, 27, 34, 0.85); border-color: #30363d; color: #e6edf3; }
+
+/* --- Binary file viewers (image, PDF, video, audio) --- */
+.bin-viewer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 0;
+}
+.image-viewer img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+.pdf-viewer embed {
+  width: 100%;
+  height: 80vh;
+  border: none;
+  border-radius: 6px;
+}
+.video-viewer video {
+  max-width: 100%;
+  border-radius: 6px;
+}
+.audio-viewer audio {
+  width: 100%;
+  max-width: 600px;
+}

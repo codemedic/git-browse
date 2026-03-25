@@ -61,17 +61,102 @@ const NEW_FILE = `\t\t} else {
 \t\t\t\t\tsend(req, filePath, {dotfiles: 'allow'}).pipe(res)
 \t\t\t\t})
 \t\t\t} else {
+\t\t\t\t// Browser-native types: show a viewer page when navigated to directly (Accept: text/html),
+\t\t\t\t// but serve raw bytes when fetched as a resource (img src, video src, etc.).
+\t\t\t\t// This mirrors GitHub's behaviour — same URL works for both contexts.
+\t\t\t\tconst _imgExts = new Set(['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico', '.bmp', '.avif'])
+\t\t\t\tconst _vidExts = new Set(['.mp4', '.webm', '.ogv', '.mov'])
+\t\t\t\tconst _audExts = new Set(['.mp3', '.wav', '.oga', '.ogg', '.flac', '.aac', '.m4a'])
+\t\t\t\tconst _ext = parsed.ext.toLowerCase()
+\t\t\t\tconst _isBrowserNative = _ext === '.pdf' || _imgExts.has(_ext) || _vidExts.has(_ext) || _audExts.has(_ext)
+\t\t\t\tif (_isBrowserNative) {
+\t\t\t\t\tconst _acceptsHtml = (req.headers['accept'] || '').includes('text/html')
+\t\t\t\t\tif (!_acceptsHtml) {
+\t\t\t\t\t\t// Resource request — serve raw so the embedded element can load the file
+\t\t\t\t\t\tmsg('file', style.link(prettyPath), flags)
+\t\t\t\t\t\tsend(req, filePath, {dotfiles: 'allow'}).pipe(res)
+\t\t\t\t\t\treturn
+\t\t\t\t\t}
+\t\t\t\t\t// Navigation request — render a viewer page using the standard template
+\t\t\t\t\tmsg('view', style.link(prettyPath), flags)
+\t\t\t\t\tlet _embedHtml
+\t\t\t\t\tif (_imgExts.has(_ext)) {
+\t\t\t\t\t\t_embedHtml = '<div class="bin-viewer image-viewer"><img src="' + decodedUrl + '" alt="' + parsed.base + '"></div>'
+\t\t\t\t\t} else if (_ext === '.pdf') {
+\t\t\t\t\t\t_embedHtml = '<div class="bin-viewer pdf-viewer"><embed src="' + decodedUrl + '" type="application/pdf"></div>'
+\t\t\t\t\t} else if (_vidExts.has(_ext)) {
+\t\t\t\t\t\t_embedHtml = '<div class="bin-viewer video-viewer"><video controls><source src="' + decodedUrl + '"></video></div>'
+\t\t\t\t\t} else {
+\t\t\t\t\t\t_embedHtml = '<div class="bin-viewer audio-viewer"><audio controls><source src="' + decodedUrl + '"></audio></div>'
+\t\t\t\t\t}
+\t\t\t\t\tmarkdownToHTML(_embedHtml).then(html => {
+\t\t\t\t\t\treturn implant(html, implantHandlers, implantOpts).then(output => {
+\t\t\t\t\t\t\tconst templateUrl = path.join(__dirname, 'templates/markdown.html')
+\t\t\t\t\t\t\tconst handlebarData = {
+\t\t\t\t\t\t\t\ttitle: parsed.base,
+\t\t\t\t\t\t\t\tcontent: output,
+\t\t\t\t\t\t\t\tpid: process.pid | 'N/A'
+\t\t\t\t\t\t\t}
+\t\t\t\t\t\t\treturn baseTemplate(templateUrl, handlebarData).then(final => {
+\t\t\t\t\t\t\t\tconst lvl2Dir = path.parse(templateUrl).dir
+\t\t\t\t\t\t\t\tconst lvl2Opts = deepmerge(implantOpts, {baseDir: lvl2Dir})
+\t\t\t\t\t\t\t\treturn implant(final, implantHandlers, lvl2Opts).then(output => {
+\t\t\t\t\t\t\t\t\tres.writeHead(200, {'content-type': 'text/html'})
+\t\t\t\t\t\t\t\t\tres.end(output)
+\t\t\t\t\t\t\t\t})
+\t\t\t\t\t\t\t})
+\t\t\t\t\t\t})
+\t\t\t\t\t}).catch(error => {
+\t\t\t\t\t\tconsole.error(error)
+\t\t\t\t\t\tsend(req, filePath, {dotfiles: 'allow'}).pipe(res)
+\t\t\t\t\t})
+\t\t\t\t\treturn
+\t\t\t\t}
+
 \t\t\t\t// Unknown extension: probe first 8 kB for null bytes — same heuristic as the
-\t\t\t\t// \`file\` command. Any null byte → binary (serve for download). Otherwise
+\t\t\t\t// \`file\` command. Any null byte → binary (show info page). Otherwise
 \t\t\t\t// treat as plain text and render in the browser.
 \t\t\t\tconst _buf = Buffer.alloc(8192)
 \t\t\t\tconst _fd = fs.openSync(filePath, 'r')
 \t\t\t\tconst _n = fs.readSync(_fd, _buf, 0, 8192, 0)
 \t\t\t\tfs.closeSync(_fd)
 \t\t\t\tif (_buf.slice(0, _n).includes(0x00)) {
-\t\t\t\t\t// Confirmed binary — serve as download
-\t\t\t\t\tmsg('file', style.link(prettyPath), flags)
-\t\t\t\t\tsend(req, filePath, {dotfiles: 'allow'}).pipe(res)
+\t\t\t\t\t// Confirmed binary — render an info page rather than forcing a download
+\t\t\t\t\tmsg('binary', style.link(prettyPath), flags)
+\t\t\t\t\tconst _stat = fs.statSync(filePath)
+\t\t\t\t\tconst _sz = _stat.size
+\t\t\t\t\tconst _humanSize = _sz >= 1048576
+\t\t\t\t\t\t? (_sz / 1048576).toFixed(1) + ' MB'
+\t\t\t\t\t\t: _sz >= 1024
+\t\t\t\t\t\t\t? (_sz / 1024).toFixed(1) + ' KB'
+\t\t\t\t\t\t\t: _sz + ' B'
+\t\t\t\t\tconst _infoMd = '## ' + parsed.base + '\\n\\n' +
+\t\t\t\t\t\t'| | |\\n|---|---|\\n' +
+\t\t\t\t\t\t'| **Path** | \`' + decodedUrl + '\` |\\n' +
+\t\t\t\t\t\t'| **Size** | ' + _humanSize + ' |\\n\\n' +
+\t\t\t\t\t\t'> Binary file — cannot be displayed in the browser.'
+\t\t\t\t\tmarkdownToHTML(_infoMd).then(html => {
+\t\t\t\t\t\treturn implant(html, implantHandlers, implantOpts).then(output => {
+\t\t\t\t\t\t\tconst templateUrl = path.join(__dirname, 'templates/markdown.html')
+\t\t\t\t\t\t\tconst handlebarData = {
+\t\t\t\t\t\t\t\ttitle: parsed.base,
+\t\t\t\t\t\t\t\tcontent: output,
+\t\t\t\t\t\t\t\tpid: process.pid | 'N/A'
+\t\t\t\t\t\t\t}
+\t\t\t\t\t\t\treturn baseTemplate(templateUrl, handlebarData).then(final => {
+\t\t\t\t\t\t\t\tconst lvl2Dir = path.parse(templateUrl).dir
+\t\t\t\t\t\t\t\tconst lvl2Opts = deepmerge(implantOpts, {baseDir: lvl2Dir})
+\t\t\t\t\t\t\t\treturn implant(final, implantHandlers, lvl2Opts).then(output => {
+\t\t\t\t\t\t\t\t\tres.writeHead(200, {'content-type': 'text/html'})
+\t\t\t\t\t\t\t\t\tres.end(output)
+\t\t\t\t\t\t\t\t})
+\t\t\t\t\t\t\t})
+\t\t\t\t\t\t})
+\t\t\t\t\t}).catch(error => {
+\t\t\t\t\t\tconsole.error(error)
+\t\t\t\t\t\tres.writeHead(500, {'content-type': 'text/plain'})
+\t\t\t\t\t\tres.end('Error rendering binary info page')
+\t\t\t\t\t})
 \t\t\t\t} else {
 \t\t\t\t\t// Text with unrecognised extension — render as plain text
 \t\t\t\t\tmsg('text', style.link(prettyPath), flags)
