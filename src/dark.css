@@ -46,6 +46,7 @@ html[data-theme="dark"] .mermaid-error-src { background: #161b22; border-color: 
 
 /* --- Auto: OS dark + no user override --- */
 @media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"])                             { background-color: var(--dark-bg); }
   html:not([data-theme="light"]) body                        { background-color: var(--dark-bg); }
   @media screen and (min-width: 768px) {
     html:not([data-theme="light"]) body                      { border-color: var(--dark-border); outline-color: var(--dark-bg); }
@@ -114,6 +115,7 @@ html[data-theme="dark"] .mermaid-error-src { background: #161b22; border-color: 
 }
 
 /* --- Forced dark: user selected dark mode explicitly --- */
+html[data-theme="dark"]                             { background-color: var(--dark-bg); }
 html[data-theme="dark"] body                        { background-color: var(--dark-bg); }
 @media screen and (min-width: 768px) {
   html[data-theme="dark"] body                      { border-color: var(--dark-border); outline-color: var(--dark-bg); }
