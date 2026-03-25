@@ -6,9 +6,32 @@
   var _bare = window.location.search.indexOf('bare') !== -1;
   if (_bare) document.documentElement.setAttribute('data-bare', '');
 
+  // SVG icon strings — GitHub Octicons paths, fill="currentColor" for theme support
+  var SVG_ARROW_RIGHT = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z"/></svg>';
+  var SVG_ARROW_DOWN  = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" d="M1.22 4.22a.75.75 0 0 1 1.06 0L8 9.94l5.72-5.72a.75.75 0 1 1 1.06 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0L1.22 5.28a.75.75 0 0 1 0-1.06z"/></svg>';
+  var SVG_FOLDER      = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25v-8.5A1.75 1.75 0 0 0 14.25 3H7.5a.25.25 0 0 1-.2-.1l-.9-1.2C6.07 1.26 5.55 1 5 1H1.75z"/></svg>';
+  var SVG_FILE        = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25V1.75zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 10 4.25V1.5H3.75zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011z"/></svg>';
+
   var STATE_KEY  = 'git-browse-filetree-v1';
   var CACHE_KEY  = 'git-browse-filetree-cache-v1';
   var SCROLL_KEY = 'git-browse-filetree-scroll-v1';
+  var WIDTH_KEY  = 'git-browse-filetree-width-v1';
+
+  var MIN_WIDTH = 160;
+  var MAX_WIDTH = 600;
+
+  // Apply sidebar width via CSS custom property — works for both the sidebar
+  // element and the body margin rule (both reference var(--ft-w) in CSS).
+  function applyWidth(w) {
+    document.documentElement.style.setProperty('--ft-w', w + 'px');
+  }
+
+  // Read saved width and apply synchronously (before DOMContentLoaded) so
+  // there is no layout shift on page load.
+  (function () {
+    var saved = parseInt(localStorage.getItem(WIDTH_KEY), 10);
+    if (saved >= MIN_WIDTH && saved <= MAX_WIDTH) applyWidth(saved);
+  }());
 
   function getState() {
     try { return JSON.parse(localStorage.getItem(STATE_KEY) || '{}'); }
@@ -105,7 +128,11 @@
 
       var arrow = document.createElement('span');
       arrow.className = 'ft-arrow';
-      arrow.textContent = isExpanded ? '▾' : '▸';
+      arrow.innerHTML = isExpanded ? SVG_ARROW_DOWN : SVG_ARROW_RIGHT;
+
+      var folderIcon = document.createElement('span');
+      folderIcon.className = 'ft-icon ft-icon-folder';
+      folderIcon.innerHTML = SVG_FOLDER;
 
       var label = document.createElement('span');
       label.className = 'ft-label';
@@ -113,6 +140,7 @@
       label.textContent = item.name;
 
       row.appendChild(arrow);
+      row.appendChild(folderIcon);
       row.appendChild(label);
       li.appendChild(row);
 
@@ -130,12 +158,12 @@
         if (!s.expanded) s.expanded = {};
         if (children.style.display === 'none') {
           children.style.display = '';
-          arrow.textContent = '▾';
+          arrow.innerHTML = SVG_ARROW_DOWN;
           s.expanded[item.href] = true;
           if (!children.hasChildNodes()) loadChildren(item.href, children);
         } else {
           children.style.display = 'none';
-          arrow.textContent = '▸';
+          arrow.innerHTML = SVG_ARROW_RIGHT;
           delete s.expanded[item.href];
         }
         saveState(s);
@@ -146,8 +174,19 @@
       a.href = item.href;
       a.className = 'ft-file-link';
       a.title = item.name;
-      a.textContent = item.name;
       if (window.location.pathname === item.href) a.classList.add('ft-active');
+
+      var fileIcon = document.createElement('span');
+      fileIcon.className = 'ft-icon ft-icon-file';
+      fileIcon.innerHTML = SVG_FILE;
+
+      var fileName = document.createElement('span');
+      fileName.className = 'ft-file-name';
+      fileName.textContent = item.name;
+
+      a.appendChild(fileIcon);
+      a.appendChild(fileName);
+
       // Shift+click: open in new window without the file-browser chrome
       a.addEventListener('click', function (e) {
         if (e.shiftKey) {
@@ -186,6 +225,35 @@
     var rootUl = document.createElement('ul');
     rootUl.className = 'ft-root';
     sidebar.appendChild(rootUl);
+
+    // Resize handle — draggable strip on the right edge of the sidebar
+    var resizeHandle = document.createElement('div');
+    resizeHandle.className = 'ft-resize-handle';
+    sidebar.appendChild(resizeHandle);
+
+    resizeHandle.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      var startX     = e.clientX;
+      var startWidth = sidebar.getBoundingClientRect().width;
+      document.body.classList.add('ft-resizing');
+
+      function onMove(e) {
+        var w = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth + e.clientX - startX));
+        applyWidth(w);
+      }
+
+      function onUp() {
+        document.body.classList.remove('ft-resizing');
+        // Persist the final width
+        var w = Math.round(sidebar.getBoundingClientRect().width);
+        localStorage.setItem(WIDTH_KEY, w);
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
 
     document.body.appendChild(sidebar);
     if (!s.hidden) document.body.classList.add('ft-open');

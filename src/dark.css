@@ -119,11 +119,15 @@ html[data-theme="dark"] a.button.back               { background-color: var(--da
 html[data-theme="dark"] #theme-toggle { background: rgba(22, 27, 34, 0.85); border-color: #30363d; color: #e6edf3; }
 
 /* --- File tree sidebar (light mode defaults) --- */
+
+/* Sidebar width as a custom property — set by JS from localStorage, default 260px */
+:root { --ft-w: 260px; }
+
 #filetree {
   position: fixed;
   top: 0;
   left: 0;
-  width: 260px;
+  width: var(--ft-w);
   height: 100vh;
   overflow-y: auto;
   background: #f6f8fa;
@@ -135,10 +139,28 @@ html[data-theme="dark"] #theme-toggle { background: rgba(22, 27, 34, 0.85); bord
   box-sizing: border-box;
   padding-bottom: 40px;
 }
-#filetree.ft-hidden { transform: translateX(-260px); }
+#filetree.ft-hidden { transform: translateX(calc(-1 * var(--ft-w))); }
 
-body.ft-open { margin-left: calc(260px + 32px) !important; transition: margin-left 0.2s ease; }
+body.ft-open { margin-left: calc(var(--ft-w) + 32px) !important; transition: margin-left 0.2s ease; }
 body:not(.ft-open) { transition: margin-left 0.2s ease; }
+
+/* Suppress transitions while the user is actively dragging the resize handle */
+body.ft-resizing #filetree,
+body.ft-resizing { transition: none !important; }
+
+/* Resize handle — thin strip on the right edge of the sidebar */
+.ft-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+  /* Transparent by default; a subtle highlight appears on hover / during drag */
+}
+.ft-resize-handle:hover,
+body.ft-resizing .ft-resize-handle { background: rgba(9, 105, 218, 0.25); }
 
 .ft-header {
   display: flex;
@@ -190,20 +212,25 @@ body:not(.ft-open) { transition: margin-left 0.2s ease; }
 }
 .ft-row:hover { background: #eaeef2; }
 
-.ft-arrow { color: #57606a; font-size: 11px; flex-shrink: 0; width: 12px; text-align: center; }
-.ft-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.ft-arrow { color: #8c959f; flex-shrink: 0; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
+.ft-icon  { flex-shrink: 0; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
+.ft-icon-folder { color: #d69e2e; }
+.ft-icon-file   { color: #8c959f; }
+.ft-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; min-width: 0; }
 
 .ft-file-link {
-  display: block;
-  padding: 3px 8px 3px 24px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  /* 28px = 8px row-padding + 16px arrow-width + 4px gap — aligns file icon with folder icon */
+  padding: 3px 8px 3px 28px;
   color: #0969da;
   text-decoration: none;
   border-radius: 4px;
   margin: 1px 4px;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
+.ft-file-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .ft-file-link:hover { background: #eaeef2; }
 .ft-file-link.ft-active { background: #dbeafe; color: #0550ae; font-weight: 600; }
 
@@ -230,12 +257,14 @@ body:not(.ft-open) { transition: margin-left 0.2s ease; }
 
 /* --- File tree dark mode (auto: OS dark + no user override) --- */
 @media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .ft-resize-handle:hover { background: rgba(88, 166, 255, 0.25); }
   html:not([data-theme="light"]) #filetree             { background: #161b22; border-color: #30363d; }
   html:not([data-theme="light"]) .ft-header            { background: #21262d; border-color: #30363d; color: #8b949e; }
   html:not([data-theme="light"]) .ft-close-btn         { color: #8b949e; }
   html:not([data-theme="light"]) .ft-row               { color: #e6edf3; }
   html:not([data-theme="light"]) .ft-row:hover         { background: #21262d; }
   html:not([data-theme="light"]) .ft-arrow             { color: #8b949e; }
+  html:not([data-theme="light"]) .ft-icon-file         { color: #8b949e; }
   html:not([data-theme="light"]) .ft-file-link         { color: #58a6ff; }
   html:not([data-theme="light"]) .ft-file-link:hover   { background: #21262d; }
   html:not([data-theme="light"]) .ft-file-link.ft-active { background: #1c2d40; color: #58a6ff; }
@@ -244,12 +273,14 @@ body:not(.ft-open) { transition: margin-left 0.2s ease; }
 }
 
 /* --- File tree dark mode (forced: user selected dark) --- */
+html[data-theme="dark"] .ft-resize-handle:hover { background: rgba(88, 166, 255, 0.25); }
 html[data-theme="dark"] #filetree             { background: #161b22; border-color: #30363d; }
 html[data-theme="dark"] .ft-header            { background: #21262d; border-color: #30363d; color: #8b949e; }
 html[data-theme="dark"] .ft-close-btn         { color: #8b949e; }
 html[data-theme="dark"] .ft-row               { color: #e6edf3; }
 html[data-theme="dark"] .ft-row:hover         { background: #21262d; }
 html[data-theme="dark"] .ft-arrow             { color: #8b949e; }
+html[data-theme="dark"] .ft-icon-file         { color: #8b949e; }
 html[data-theme="dark"] .ft-file-link         { color: #58a6ff; }
 html[data-theme="dark"] .ft-file-link:hover   { background: #21262d; }
 html[data-theme="dark"] .ft-file-link.ft-active { background: #1c2d40; color: #58a6ff; }

@@ -7,11 +7,12 @@ Powered by [markserv](https://github.com/markserv/markserv).
 ## Features
 
 - **Markdown rendering** — GitHub-flavoured markdown with Mermaid diagram support
-- **Syntax highlighting** — for code files; see [supported file types](#supported-file-types)
-- **Live reload** — page refreshes automatically when files change on disk; configurable via `LIVERELOAD_PORT`
-- **File tree sidebar** — hideable; expand/collapse and scroll state are persisted across page loads
-- **README auto-render** — any `README.md` in a directory is rendered below the file listing
-- **Media preview** — images, PDFs, videos, and audio open inline; other binary files show file info
+- **Syntax highlighting** — see [supported file types](#supported-file-types)
+- **Live reload** — configurable via `LIVERELOAD_PORT`
+- **File tree sidebar** — resizable and hideable
+- **Preview / source toggle** — for markdown and HTML files
+- **Bare mode** — `?bare` strips all chrome; Shift+click a file link opens it bare
+- **Media preview** — images, PDFs, video, and audio open inline
 
 ## Requirements
 
