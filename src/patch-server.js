@@ -114,6 +114,15 @@ const OLD_MARKDOWN = `\t\tif (isMarkdown) {
 const NEW_MARKDOWN = fs.readFileSync('/tmp/patches/markdown.js', 'utf8').trimEnd()
 
 // ---------------------------------------------------------------------------
+// Patch 5: Git repo state dashboard (/_git/* virtual routes)
+// ---------------------------------------------------------------------------
+
+const OLD_GIT = `\t\tconst prettyPath = filePath`
+
+const NEW_GIT = fs.readFileSync('/tmp/patches/git-state.js', 'utf8').trimEnd() +
+    '\n\n\t\tconst prettyPath = filePath'
+
+// ---------------------------------------------------------------------------
 
 let content = fs.readFileSync(SERVER_PATH, 'utf8')
 
@@ -141,5 +150,11 @@ if (!content.includes(OLD_MARKDOWN)) {
 }
 content = content.replace(OLD_MARKDOWN, NEW_MARKDOWN)
 
+if (!content.includes(OLD_GIT)) {
+  console.error('Patch 5 (/_git routes) target block not found — server.js may have changed')
+  process.exit(1)
+}
+content = content.replace(OLD_GIT, NEW_GIT)
+
 fs.writeFileSync(SERVER_PATH, content, 'utf8')
-console.log('server.js patched successfully (4 patches applied)')
+console.log('server.js patched successfully (5 patches applied)')

@@ -31,17 +31,21 @@ function applyPatches (snapshot, patchSrc) {
 	const OLD_DIR      = evalOldConst(patchSrc, 'OLD_DIR')
 	const OLD_HTML     = evalOldConst(patchSrc, 'OLD_HTML')
 	const OLD_MARKDOWN = evalOldConst(patchSrc, 'OLD_MARKDOWN')
+	const OLD_GIT      = evalOldConst(patchSrc, 'OLD_GIT')
 
 	const NEW_FILE     = fs.readFileSync(path.join(PATCHES_DIR, 'other.js'),    'utf8').trimEnd()
 	const NEW_DIR      = fs.readFileSync(path.join(PATCHES_DIR, 'dir.js'),      'utf8').trimEnd()
 	const NEW_HTML     = fs.readFileSync(path.join(PATCHES_DIR, 'html.js'),     'utf8').trimEnd()
 	const NEW_MARKDOWN = fs.readFileSync(path.join(PATCHES_DIR, 'markdown.js'), 'utf8').trimEnd()
+	const gitFragment  = fs.readFileSync(path.join(PATCHES_DIR, 'git-state.js'), 'utf8').trimEnd()
+	const NEW_GIT      = gitFragment + '\n\n\t\tconst prettyPath = filePath'
 
 	let content = snapshot
 	content = content.replace(OLD_FILE, NEW_FILE)
 	content = content.replace(OLD_DIR, NEW_DIR)
 	content = content.replace(OLD_HTML, NEW_HTML)
 	content = content.replace(OLD_MARKDOWN, NEW_MARKDOWN)
+	content = content.replace(OLD_GIT, NEW_GIT)
 	return content
 }
 
@@ -68,13 +72,27 @@ test('each OLD_* string is present in the server-original.js snapshot', () => {
 	const snapshot  = fs.readFileSync(FIXTURE, 'utf8')
 	const patchSrc  = fs.readFileSync(path.join(ROOT, 'src', 'patch-server.js'), 'utf8')
 
-	for (const name of ['OLD_FILE', 'OLD_DIR', 'OLD_HTML', 'OLD_MARKDOWN']) {
+	for (const name of ['OLD_FILE', 'OLD_DIR', 'OLD_HTML', 'OLD_MARKDOWN', 'OLD_GIT']) {
 		const old = evalOldConst(patchSrc, name)
 		assert.ok(
 			snapshot.includes(old),
 			name + ' target block not found in server-original.js — markserv may have changed'
 		)
 	}
+})
+
+// ---------------------------------------------------------------------------
+// Test 6: Patch 5 — /_git route block is present after patching
+// ---------------------------------------------------------------------------
+
+test('patched server.js contains /_git route handler', () => {
+	const snapshot  = fs.readFileSync(FIXTURE, 'utf8')
+	const patchSrc  = fs.readFileSync(path.join(ROOT, 'src', 'patch-server.js'), 'utf8')
+	const patched   = applyPatches(snapshot, patchSrc)
+
+	assert.ok(patched.includes('/_git/state'), 'patched server.js must contain /_git/state route')
+	assert.ok(patched.includes('/_git/log'),   'patched server.js must contain /_git/log route')
+	assert.ok(patched.includes('/_git/diff/'), 'patched server.js must contain /_git/diff/ route')
 })
 
 // ---------------------------------------------------------------------------
