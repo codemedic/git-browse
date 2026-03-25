@@ -6,14 +6,12 @@ Powered by [markserv](https://github.com/markserv/markserv).
 
 ## Features
 
-- **Markdown rendering** — GitHub-flavoured markdown (tables, task lists, fenced code blocks)
-- **Mermaid diagrams** — rendered inline from fenced `mermaid` code blocks
-- **Syntax highlighting** — for code files browsed directly (`.js`, `.py`, `.go`, `.ts`, `.yml`, and [many more](#supported-file-types))
+- **Markdown rendering** — GitHub-flavoured markdown with Mermaid diagram support
+- **Syntax highlighting** — for code files; see [supported file types](#supported-file-types)
 - **Live reload** — page refreshes automatically when files change on disk; configurable via `LIVERELOAD_PORT`
-- **File tree sidebar** — hideable left-hand pane showing the full directory tree from the repository root; expand/collapse state and visibility are persisted in `localStorage`; a `☰` toggle button restores it when hidden
-- **README auto-render** — when browsing a directory, any `README.md` (or `readme.md`, `README.markdown`, `README.txt`, etc.) is rendered below the file listing, GitHub-style
-- **Plain-text fallback** — files with unrecognised extensions are probed for binary content using a null-byte heuristic; text files render in the browser, confirmed binary files are offered as downloads
-- **Dark / light / auto mode** — follows OS preference by default; toggle button to override
+- **File tree sidebar** — hideable; expand/collapse and scroll state are persisted across page loads
+- **README auto-render** — any `README.md` in a directory is rendered below the file listing
+- **Media preview** — images, PDFs, videos, and audio open inline; other binary files show file info
 
 ## Requirements
 
@@ -70,7 +68,7 @@ Code files are rendered with syntax highlighting when browsed directly:
 
 Markdown files (`.md`, `.markdown`, and others) are always rendered as HTML.
 
-Files with unrecognised extensions that are detected as binary are offered as downloads rather than rendered.
+Files with unrecognised extensions that are detected as binary show file info and are offered as downloads.
 
 ## License
 

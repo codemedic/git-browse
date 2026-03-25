@@ -283,3 +283,53 @@ html[data-theme="dark"] #filetree-open-btn    { background: rgba(22, 27, 34, 0.8
   width: 100%;
   max-width: 600px;
 }
+
+/* --- Offline toast notification --- */
+#offline-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #b91c1c;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 99999;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+#offline-toast.offline-toast-visible { opacity: 1; }
+#offline-toast-dismiss {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+  line-height: 1;
+}
+#offline-toast-dismiss:hover { opacity: 1; }
+
+/* --- Fluid layout: override markserv's fixed 978px body --- */
+/* Body fills the viewport; text content is capped for readability;
+   media viewers are free to expand to full available width. */
+body {
+  width: auto;
+  max-width: 100%;
+  margin: 16px 32px;
+}
+/* Constrain text content (markdown, code) but not media viewer pages */
+article.markdown-body:not(:has(.bin-viewer)) {
+  max-width: 978px;
+  margin: 0 auto;
+}
+.bin-viewer {
+  width: 100%;
+}

@@ -82,7 +82,8 @@
           });
         })
         .catch(function () {
-          spinner.textContent = 'Error loading';
+          spinner.remove();
+          if (typeof window.__gitBrowseOffline === 'function') window.__gitBrowseOffline();
         });
     }
   }
