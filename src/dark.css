@@ -64,9 +64,9 @@ html[data-theme="dark"] .mermaid-error-src { background: #161b22; border-color: 
   html:not([data-theme="light"]) .markdown-body code         { background-color: var(--dark-code-bg); }
   html:not([data-theme="light"]) .markdown-body .highlight pre,
   html:not([data-theme="light"]) .markdown-body pre          { background-color: var(--dark-pre-bg); }
-  /* pre > code inherits the pre background; inline grey would double-apply */
+  /* pre > code inherits the pre background; strip all token backgrounds from hljs */
   html:not([data-theme="light"]) .markdown-body pre code,
-  html:not([data-theme="light"]) .markdown-body pre code span { background-color: transparent !important; }
+  html:not([data-theme="light"]) .markdown-body pre code span { background: transparent !important; }
   html:not([data-theme="light"]) .markdown-body kbd          { background-color: var(--dark-pre-bg); background-image: linear-gradient(var(--dark-border-sub), var(--dark-pre-bg)); border-color: var(--dark-border); color: var(--dark-text); }
   html:not([data-theme="light"]) .icon.isfolder:before,
   html:not([data-theme="light"]) .icon.isfile:before         { background-color: var(--dark-icon); }
@@ -92,9 +92,9 @@ html[data-theme="dark"] .markdown-body table tr:nth-child(2n) { background-color
 html[data-theme="dark"] .markdown-body code         { background-color: var(--dark-code-bg); }
 html[data-theme="dark"] .markdown-body .highlight pre,
 html[data-theme="dark"] .markdown-body pre          { background-color: var(--dark-pre-bg); }
-/* pre > code inherits the pre background; inline grey would double-apply */
+/* pre > code inherits the pre background; strip all token backgrounds from hljs */
 html[data-theme="dark"] .markdown-body pre code,
-html[data-theme="dark"] .markdown-body pre code span { background-color: transparent !important; }
+html[data-theme="dark"] .markdown-body pre code span { background: transparent !important; }
 html[data-theme="dark"] .markdown-body kbd          { background-color: var(--dark-pre-bg); background-image: linear-gradient(var(--dark-border-sub), var(--dark-pre-bg)); border-color: var(--dark-border); color: var(--dark-text); }
 html[data-theme="dark"] .icon.isfolder:before,
 html[data-theme="dark"] .icon.isfile:before         { background-color: var(--dark-icon); }
