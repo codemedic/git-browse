@@ -1,15 +1,23 @@
-// Patches markserv's server.js to syntax-highlight code files.
+// Patches markserv's server.js:
+//   1. Syntax-highlight known code file extensions.
+//   2. Probe unknown-extension files for binary content (null-byte heuristic);
+//      render as plain text if clean, download if binary.
+//   3. Render README.md (or similar) below the directory listing (GitHub-style).
 const fs = require('fs')
 
 const SERVER_PATH = '/usr/local/lib/node_modules/markserv/lib/server.js'
 
-const OLD = `\t\t} else {
+// ---------------------------------------------------------------------------
+// Patch 1: code / binary / plain-text handling for non-markdown files
+// ---------------------------------------------------------------------------
+
+const OLD_FILE = `\t\t} else {
 \t\t\t// Other: Browser requests other MIME typed file (handled by 'send')
 \t\t\tmsg('file', style.link(prettyPath), flags)
 \t\t\tsend(req, filePath, {dotfiles: 'allow'}).pipe(res)
 \t\t}`
 
-const NEW = `\t\t} else {
+const NEW_FILE = `\t\t} else {
 \t\t\t// Code files: render with syntax highlighting via existing markdown-it-highlightjs pipeline
 \t\t\tconst codeExts = new Set([
 \t\t\t\t'.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx',
@@ -53,18 +61,141 @@ const NEW = `\t\t} else {
 \t\t\t\t\tsend(req, filePath, {dotfiles: 'allow'}).pipe(res)
 \t\t\t\t})
 \t\t\t} else {
-\t\t\t\t// Other: Browser requests other MIME typed file (handled by 'send')
-\t\t\t\tmsg('file', style.link(prettyPath), flags)
-\t\t\t\tsend(req, filePath, {dotfiles: 'allow'}).pipe(res)
+\t\t\t\t// Unknown extension: probe first 8 kB for null bytes — same heuristic as the
+\t\t\t\t// \`file\` command. Any null byte → binary (serve for download). Otherwise
+\t\t\t\t// treat as plain text and render in the browser.
+\t\t\t\tconst _buf = Buffer.alloc(8192)
+\t\t\t\tconst _fd = fs.openSync(filePath, 'r')
+\t\t\t\tconst _n = fs.readSync(_fd, _buf, 0, 8192, 0)
+\t\t\t\tfs.closeSync(_fd)
+\t\t\t\tif (_buf.slice(0, _n).includes(0x00)) {
+\t\t\t\t\t// Confirmed binary — serve as download
+\t\t\t\t\tmsg('file', style.link(prettyPath), flags)
+\t\t\t\t\tsend(req, filePath, {dotfiles: 'allow'}).pipe(res)
+\t\t\t\t} else {
+\t\t\t\t\t// Text with unrecognised extension — render as plain text
+\t\t\t\t\tmsg('text', style.link(prettyPath), flags)
+\t\t\t\t\tgetFile(filePath).then(content => {
+\t\t\t\t\t\tconst markdownContent = '\`\`\`\\n' + content + '\\n\`\`\`'
+\t\t\t\t\t\treturn markdownToHTML(markdownContent).then(html => {
+\t\t\t\t\t\t\treturn implant(html, implantHandlers, implantOpts).then(output => {
+\t\t\t\t\t\t\t\tconst templateUrl = path.join(__dirname, 'templates/markdown.html')
+\t\t\t\t\t\t\t\tconst handlebarData = {
+\t\t\t\t\t\t\t\t\ttitle: parsed.base,
+\t\t\t\t\t\t\t\t\tcontent: output,
+\t\t\t\t\t\t\t\t\tpid: process.pid | 'N/A'
+\t\t\t\t\t\t\t\t}
+\t\t\t\t\t\t\t\treturn baseTemplate(templateUrl, handlebarData).then(final => {
+\t\t\t\t\t\t\t\t\tconst lvl2Dir = path.parse(templateUrl).dir
+\t\t\t\t\t\t\t\t\tconst lvl2Opts = deepmerge(implantOpts, {baseDir: lvl2Dir})
+\t\t\t\t\t\t\t\t\treturn implant(final, implantHandlers, lvl2Opts).then(output => {
+\t\t\t\t\t\t\t\t\t\tres.writeHead(200, {'content-type': 'text/html'})
+\t\t\t\t\t\t\t\t\t\tres.end(output)
+\t\t\t\t\t\t\t\t\t})
+\t\t\t\t\t\t\t\t})
+\t\t\t\t\t\t\t})
+\t\t\t\t\t\t})
+\t\t\t\t\t}).catch(error => {
+\t\t\t\t\t\tconsole.error(error)
+\t\t\t\t\t\tsend(req, filePath, {dotfiles: 'allow'}).pipe(res)
+\t\t\t\t\t})
+\t\t\t\t}
 \t\t\t}
 \t\t}`
 
+// ---------------------------------------------------------------------------
+// Patch 2: directory listing with README auto-render (GitHub-style)
+// ---------------------------------------------------------------------------
+
+const OLD_DIR = `\t\t} else if (isDir) {
+\t\t\ttry {
+\t\t\t\t// Index: Browser is requesting a Directory Index
+\t\t\t\tmsg('dir', style.link(prettyPath), flags)
+
+\t\t\t\tconst templateUrl = path.join(__dirname, 'templates/directory.html')
+
+\t\t\t\tconst handlebarData = {
+\t\t\t\t\tdirname: path.parse(filePath).dir,
+\t\t\t\t\tcontent: dirToHtml(filePath),
+\t\t\t\t\ttitle: path.parse(filePath).base,
+\t\t\t\t\tpid: process.pid | 'N/A',
+\t\t\t\t\tbreadcrumbs: createBreadcrumbs(path.relative(dir, filePath))
+\t\t\t\t}
+
+\t\t\t\treturn baseTemplate(templateUrl, handlebarData).then(final => {
+\t\t\t\t\tconst lvl2Dir = path.parse(templateUrl).dir
+\t\t\t\t\tconst lvl2Opts = deepmerge(implantOpts, {baseDir: lvl2Dir})
+\t\t\t\t\treturn implant(final, implantHandlers, lvl2Opts).then(output => {
+\t\t\t\t\t\tres.writeHead(200, {
+\t\t\t\t\t\t\t'content-type': 'text/html'
+\t\t\t\t\t\t})
+\t\t\t\t\t\tres.end(output)
+\t\t\t\t\t}).catch(error => {
+\t\t\t\t\t\tconsole.error(error)
+\t\t\t\t\t})
+\t\t\t\t})
+\t\t\t} catch (error) {
+\t\t\t\terrorPage(500, filePath, error)
+\t\t\t}`
+
+const NEW_DIR = `\t\t} else if (isDir) {
+\t\t\ttry {
+\t\t\t\t// Index: Browser is requesting a Directory Index
+\t\t\t\tmsg('dir', style.link(prettyPath), flags)
+
+\t\t\t\tconst templateUrl = path.join(__dirname, 'templates/directory.html')
+
+\t\t\t\t// GitHub-style: find a README in the directory and render it below the listing
+\t\t\t\tconst _entries = fs.readdirSync(filePath)
+\t\t\t\tconst _readme = _entries.find(f => /^readme(\\.md|\\.markdown|\\.txt)?$/i.test(f))
+\t\t\t\tconst _readmePath = _readme ? path.join(filePath, _readme) : null
+\t\t\t\tconst _renderReadme = _readmePath
+\t\t\t\t\t? getFile(_readmePath).then(markdownToHTML).catch(() => '')
+\t\t\t\t\t: Promise.resolve('')
+
+\t\t\t\treturn _renderReadme.then(_readmeHtml => {
+\t\t\t\t\tconst handlebarData = {
+\t\t\t\t\t\tdirname: path.parse(filePath).dir,
+\t\t\t\t\t\tcontent: dirToHtml(filePath) + (_readmeHtml
+\t\t\t\t\t\t\t? '<hr class="readme-divider"><div class="readme-body markdown-body">' + _readmeHtml + '</div>'
+\t\t\t\t\t\t\t: ''),
+\t\t\t\t\t\ttitle: path.parse(filePath).base,
+\t\t\t\t\t\tpid: process.pid | 'N/A',
+\t\t\t\t\t\tbreadcrumbs: createBreadcrumbs(path.relative(dir, filePath))
+\t\t\t\t\t}
+
+\t\t\t\t\treturn baseTemplate(templateUrl, handlebarData).then(final => {
+\t\t\t\t\t\tconst lvl2Dir = path.parse(templateUrl).dir
+\t\t\t\t\t\tconst lvl2Opts = deepmerge(implantOpts, {baseDir: lvl2Dir})
+\t\t\t\t\t\treturn implant(final, implantHandlers, lvl2Opts).then(output => {
+\t\t\t\t\t\t\tres.writeHead(200, {
+\t\t\t\t\t\t\t\t'content-type': 'text/html'
+\t\t\t\t\t\t\t})
+\t\t\t\t\t\t\tres.end(output)
+\t\t\t\t\t\t}).catch(error => {
+\t\t\t\t\t\t\tconsole.error(error)
+\t\t\t\t\t\t})
+\t\t\t\t\t})
+\t\t\t\t})
+\t\t\t} catch (error) {
+\t\t\t\terrorPage(500, filePath, error)
+\t\t\t}`
+
+// ---------------------------------------------------------------------------
+
 let content = fs.readFileSync(SERVER_PATH, 'utf8')
 
-if (!content.includes(OLD)) {
-  console.error('Target block not found — server.js may have changed')
+if (!content.includes(OLD_FILE)) {
+  console.error('Patch 1 target block not found — server.js may have changed')
   process.exit(1)
 }
+content = content.replace(OLD_FILE, NEW_FILE)
 
-fs.writeFileSync(SERVER_PATH, content.replace(OLD, NEW), 'utf8')
-console.log('server.js patched successfully')
+if (!content.includes(OLD_DIR)) {
+  console.error('Patch 2 target block not found — server.js may have changed')
+  process.exit(1)
+}
+content = content.replace(OLD_DIR, NEW_DIR)
+
+fs.writeFileSync(SERVER_PATH, content, 'utf8')
+console.log('server.js patched successfully (2 patches applied)')

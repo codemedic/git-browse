@@ -7,8 +7,11 @@ RUN cat /tmp/dark.css >> /usr/local/lib/node_modules/markserv/lib/templates/mark
 
 COPY src/theme-toggle.js /usr/local/lib/node_modules/markserv/lib/templates/theme-toggle.js
 COPY src/mermaid-init.js /usr/local/lib/node_modules/markserv/lib/templates/mermaid-init.js
-RUN sed -i 's|</head>|<script src="{markserv}templates/theme-toggle.js"></script>\n<script type="module" src="{markserv}templates/mermaid-init.js"></script>\n</head>|' \
+COPY src/filetree.js /usr/local/lib/node_modules/markserv/lib/templates/filetree.js
+RUN sed -i 's|</head>|<script src="{markserv}templates/theme-toggle.js"></script>\n<script type="module" src="{markserv}templates/mermaid-init.js"></script>\n<script src="{markserv}templates/filetree.js"></script>\n</head>|' \
     /usr/local/lib/node_modules/markserv/lib/templates/markdown.html
+RUN sed -i 's|</head>|<script src="{markserv}templates/theme-toggle.js"></script>\n<script src="{markserv}templates/filetree.js"></script>\n</head>|' \
+    /usr/local/lib/node_modules/markserv/lib/templates/directory.html
 
 COPY src/patch-server.js /tmp/patch-server.js
 RUN node /tmp/patch-server.js
@@ -16,5 +19,6 @@ RUN node /tmp/patch-server.js
 WORKDIR /var/www
 
 EXPOSE 8080
+EXPOSE 35729
 
-ENTRYPOINT ["markserv", ".", "--address", "0.0.0.0", "--port", "8080"]
+ENTRYPOINT ["sh", "-c", "exec markserv . --address 0.0.0.0 --port 8080 --livereloadport ${LIVERELOAD_PORT:-35729}"]

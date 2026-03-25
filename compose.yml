@@ -2,7 +2,8 @@ services:
   markserv:
     build: .
     ports:
-      - "8080:8080"
+      - "${PORT:-8080}:8080"
+      - "${LIVERELOAD_PORT:-35729}:${LIVERELOAD_PORT:-35729}"
     volumes:
       - ${REPO_PATH:-.}:/var/www:ro
     restart: unless-stopped
