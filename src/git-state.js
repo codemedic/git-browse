@@ -345,12 +345,14 @@
   }
 
   function buildWorktrees(worktrees) {
-    if (!worktrees || worktrees.length <= 1) return '';
-    var rows = worktrees.map(function (wt) {
+    // Index 0 is always the main worktree (/var/www inside the container) — not useful to show
+    var linked = worktrees ? worktrees.slice(1) : [];
+    if (!linked.length) return '';
+    var rows = linked.map(function (wt) {
       return '<tr><td class="git-wt-path">' + esc(wt.path) + '</td><td>' + esc(wt.branch) + '</td><td><span class="git-sha">' + esc(wt.sha) + '</span></td></tr>';
     }).join('');
     return '<h2 class="git-section-heading">Worktrees</h2>' +
-      '<table class="git-table"><thead><tr><th>Path</th><th>Branch</th><th>Commit</th></tr></thead><tbody>' + rows + '</tbody></table>';
+      '<table class="git-table git-wt-table"><thead><tr><th>Path</th><th>Branch</th><th>Commit</th></tr></thead><tbody>' + rows + '</tbody></table>';
   }
 
   // ---------------------------------------------------------------------------

@@ -597,6 +597,8 @@ html[data-theme="dark"] .html-preview-frame { border-color: var(--dark-border); 
   max-width: 280px;
 }
 .git-wt-path { font-family: monospace; font-size: 12px; }
+/* Worktrees table: let path and branch columns use full available width */
+.git-wt-table td { max-width: none; }
 
 /* --- Tracking status --- */
 .git-ahead  { color: #1a7f37; font-weight: 600; margin-right: 4px; }
