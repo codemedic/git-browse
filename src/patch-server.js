@@ -3,6 +3,8 @@
 //   2. Probe unknown-extension files for binary content (null-byte heuristic);
 //      render as plain text if clean, download if binary.
 //   3. Render README.md (or similar) below the directory listing (GitHub-style).
+//   4. HTML files: sandboxed preview with source toggle.
+//   5. Markdown files: rendered preview with raw source toggle.
 const fs = require('fs')
 
 const SERVER_PATH = '/usr/local/lib/node_modules/markserv/lib/server.js'
@@ -267,6 +269,143 @@ const NEW_DIR = `\t\t} else if (isDir) {
 \t\t\t}`
 
 // ---------------------------------------------------------------------------
+// Patch 3: HTML file — sandboxed preview + source toggle
+// ---------------------------------------------------------------------------
+
+const OLD_HTML = `\t\t} else if (isHtml) {
+\t\t\tmsg('html', style.link(prettyPath), flags)
+\t\t\tgetFile(filePath).then(html => {
+\t\t\t\treturn implant(html, implantHandlers, implantOpts).then(output => {
+\t\t\t\t\tres.writeHead(200, {
+\t\t\t\t\t\t'content-type': 'text/html'
+\t\t\t\t\t})
+\t\t\t\t\tres.end(output)
+\t\t\t\t})
+\t\t\t}).catch(error => {
+\t\t\t\tconsole.error(error)
+\t\t\t})`
+
+const NEW_HTML = `\t\t} else if (isHtml) {
+\t\t\tmsg('html', style.link(prettyPath), flags)
+\t\t\tgetFile(filePath).then(content => {
+\t\t\t\t// Inject <base> so relative resource URLs resolve correctly inside the iframe
+\t\t\t\tconst _withBase = /<head/i.test(content)
+\t\t\t\t\t? content.replace(/(<head[^>]*>)/i, '$1\\n<base href="' + decodedUrl + '">')
+\t\t\t\t\t: '<base href="' + decodedUrl + '">\\n' + content
+\t\t\t\tconst _srcdoc = _withBase.replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+\t\t\t\tvar _maxBt = 0, _btm, _btre = /\`+/g
+\t\t\t\twhile ((_btm = _btre.exec(content)) !== null) { if (_btm[0].length > _maxBt) _maxBt = _btm[0].length }
+\t\t\t\tconst _fence = '\`'.repeat(Math.max(3, _maxBt + 1))
+\t\t\t\tconst _srcMd = _fence + 'html\\n' + content + '\\n' + _fence
+\t\t\t\treturn markdownToHTML(_srcMd).then(srcHtml => {
+\t\t\t\t\tconst _combined =
+\t\t\t\t\t\t'<div class="source-toggle-bar">' +
+\t\t\t\t\t\t'<button class="toggle-btn active" data-panel="preview">Preview</button>' +
+\t\t\t\t\t\t'<button class="toggle-btn" data-panel="source">Code</button>' +
+\t\t\t\t\t\t'</div>' +
+\t\t\t\t\t\t'<div class="toggle-panel" data-panel="preview">' +
+\t\t\t\t\t\t'<iframe class="html-preview-frame" sandbox="allow-scripts allow-same-origin allow-forms" srcdoc="' + _srcdoc + '"></iframe>' +
+\t\t\t\t\t\t'</div>' +
+\t\t\t\t\t\t'<div class="toggle-panel" data-panel="source" style="display:none">' +
+\t\t\t\t\t\tsrcHtml +
+\t\t\t\t\t\t'</div>'
+\t\t\t\t\tconst templateUrl = path.join(__dirname, 'templates/markdown.html')
+\t\t\t\t\tconst handlebarData = {
+\t\t\t\t\t\ttitle: path.parse(filePath).base,
+\t\t\t\t\t\tcontent: _combined,
+\t\t\t\t\t\tpid: process.pid | 'N/A'
+\t\t\t\t\t}
+\t\t\t\t\treturn baseTemplate(templateUrl, handlebarData).then(final => {
+\t\t\t\t\t\tconst lvl2Dir = path.parse(templateUrl).dir
+\t\t\t\t\t\tconst lvl2Opts = deepmerge(implantOpts, {baseDir: lvl2Dir})
+\t\t\t\t\t\treturn implant(final, implantHandlers, lvl2Opts).then(output => {
+\t\t\t\t\t\t\tres.writeHead(200, {'content-type': 'text/html'})
+\t\t\t\t\t\t\tres.end(output)
+\t\t\t\t\t\t})
+\t\t\t\t\t})
+\t\t\t\t})
+\t\t\t}).catch(error => {
+\t\t\t\tconsole.error(error)
+\t\t\t})`
+
+// ---------------------------------------------------------------------------
+// Patch 4: Markdown — rendered preview + raw source toggle
+// ---------------------------------------------------------------------------
+
+const OLD_MARKDOWN = `\t\tif (isMarkdown) {
+\t\t\tmsg('markdown', style.link(prettyPath), flags)
+\t\t\tgetFile(filePath).then(markdownToHTML).then(filePath).then(html => {
+\t\t\t\treturn implant(html, implantHandlers, implantOpts).then(output => {
+\t\t\t\t\tconst templateUrl = path.join(__dirname, 'templates/markdown.html')
+
+\t\t\t\t\tconst handlebarData = {
+\t\t\t\t\t\ttitle: path.parse(filePath).base,
+\t\t\t\t\t\tcontent: output,
+\t\t\t\t\t\tpid: process.pid | 'N/A'
+\t\t\t\t\t}
+
+\t\t\t\t\treturn baseTemplate(templateUrl, handlebarData).then(final => {
+\t\t\t\t\t\tconst lvl2Dir = path.parse(templateUrl).dir
+\t\t\t\t\t\tconst lvl2Opts = deepmerge(implantOpts, {baseDir: lvl2Dir})
+
+\t\t\t\t\t\treturn implant(final, implantHandlers, lvl2Opts)
+\t\t\t\t\t\t\t.then(output => {
+\t\t\t\t\t\t\t\tres.writeHead(200, {
+\t\t\t\t\t\t\t\t\t'content-type': 'text/html'
+\t\t\t\t\t\t\t\t})
+\t\t\t\t\t\t\t\tres.end(output)
+\t\t\t\t\t\t\t})
+\t\t\t\t\t})
+\t\t\t\t})
+\t\t\t}).catch(error => {
+\t\t\t\tconsole.error(error)
+\t\t\t})
+\t\t}`
+
+const NEW_MARKDOWN = `\t\tif (isMarkdown) {
+\t\t\tmsg('markdown', style.link(prettyPath), flags)
+\t\t\tgetFile(filePath).then(rawSource => {
+\t\t\t\treturn markdownToHTML(rawSource).then(renderedHtml => {
+\t\t\t\t\treturn implant(renderedHtml, implantHandlers, implantOpts).then(renderedOutput => {
+\t\t\t\t\t\tvar _maxBt = 0, _btm, _btre = /\`+/g
+\t\t\t\t\t\twhile ((_btm = _btre.exec(rawSource)) !== null) { if (_btm[0].length > _maxBt) _maxBt = _btm[0].length }
+\t\t\t\t\t\tconst _fence = '\`'.repeat(Math.max(3, _maxBt + 1))
+\t\t\t\t\t\tconst _srcMd = _fence + 'markdown\\n' + rawSource + '\\n' + _fence
+\t\t\t\t\t\treturn markdownToHTML(_srcMd).then(srcHtml => {
+\t\t\t\t\t\t\tconst _combined =
+\t\t\t\t\t\t\t\t'<div class="source-toggle-bar">' +
+\t\t\t\t\t\t\t\t'<button class="toggle-btn active" data-panel="preview">Preview</button>' +
+\t\t\t\t\t\t\t\t'<button class="toggle-btn" data-panel="source">Source</button>' +
+\t\t\t\t\t\t\t\t'</div>' +
+\t\t\t\t\t\t\t\t'<div class="toggle-panel" data-panel="preview">' +
+\t\t\t\t\t\t\t\trenderedOutput +
+\t\t\t\t\t\t\t\t'</div>' +
+\t\t\t\t\t\t\t\t'<div class="toggle-panel" data-panel="source" style="display:none">' +
+\t\t\t\t\t\t\t\tsrcHtml +
+\t\t\t\t\t\t\t\t'</div>'
+\t\t\t\t\t\t\tconst templateUrl = path.join(__dirname, 'templates/markdown.html')
+\t\t\t\t\t\t\tconst handlebarData = {
+\t\t\t\t\t\t\t\ttitle: path.parse(filePath).base,
+\t\t\t\t\t\t\t\tcontent: _combined,
+\t\t\t\t\t\t\t\tpid: process.pid | 'N/A'
+\t\t\t\t\t\t\t}
+\t\t\t\t\t\t\treturn baseTemplate(templateUrl, handlebarData).then(final => {
+\t\t\t\t\t\t\t\tconst lvl2Dir = path.parse(templateUrl).dir
+\t\t\t\t\t\t\t\tconst lvl2Opts = deepmerge(implantOpts, {baseDir: lvl2Dir})
+\t\t\t\t\t\t\t\treturn implant(final, implantHandlers, lvl2Opts).then(output => {
+\t\t\t\t\t\t\t\t\tres.writeHead(200, {'content-type': 'text/html'})
+\t\t\t\t\t\t\t\t\tres.end(output)
+\t\t\t\t\t\t\t\t})
+\t\t\t\t\t\t\t})
+\t\t\t\t\t\t})
+\t\t\t\t\t})
+\t\t\t\t})
+\t\t\t}).catch(error => {
+\t\t\t\tconsole.error(error)
+\t\t\t})
+\t\t}`
+
+// ---------------------------------------------------------------------------
 
 let content = fs.readFileSync(SERVER_PATH, 'utf8')
 
@@ -282,5 +421,17 @@ if (!content.includes(OLD_DIR)) {
 }
 content = content.replace(OLD_DIR, NEW_DIR)
 
+if (!content.includes(OLD_HTML)) {
+  console.error('Patch 3 (isHtml) target block not found — server.js may have changed')
+  process.exit(1)
+}
+content = content.replace(OLD_HTML, NEW_HTML)
+
+if (!content.includes(OLD_MARKDOWN)) {
+  console.error('Patch 4 (isMarkdown) target block not found — server.js may have changed')
+  process.exit(1)
+}
+content = content.replace(OLD_MARKDOWN, NEW_MARKDOWN)
+
 fs.writeFileSync(SERVER_PATH, content, 'utf8')
-console.log('server.js patched successfully (2 patches applied)')
+console.log('server.js patched successfully (4 patches applied)')

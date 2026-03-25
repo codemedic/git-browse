@@ -1,6 +1,11 @@
 (function () {
   'use strict';
 
+  // Bare mode: suppress all chrome for clean presentation / new-window viewing.
+  // Applied synchronously so other scripts (theme-toggle etc.) never show chrome.
+  var _bare = window.location.search.indexOf('bare') !== -1;
+  if (_bare) document.documentElement.setAttribute('data-bare', '');
+
   var STATE_KEY  = 'git-browse-filetree-v1';
   var CACHE_KEY  = 'git-browse-filetree-cache-v1';
   var SCROLL_KEY = 'git-browse-filetree-scroll-v1';
@@ -143,6 +148,13 @@
       a.title = item.name;
       a.textContent = item.name;
       if (window.location.pathname === item.href) a.classList.add('ft-active');
+      // Shift+click: open in new window without the file-browser chrome
+      a.addEventListener('click', function (e) {
+        if (e.shiftKey) {
+          e.preventDefault();
+          window.open(item.href + '?bare', '_blank');
+        }
+      });
       li.appendChild(a);
     }
 
@@ -150,6 +162,8 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    if (_bare) return; // no sidebar in bare mode
+
     var s = getState();
 
     // Build sidebar

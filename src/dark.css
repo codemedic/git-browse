@@ -333,3 +333,63 @@ article.markdown-body:not(:has(.bin-viewer)) {
 .bin-viewer {
   width: 100%;
 }
+
+/* --- Bare mode: clean presentation without file-browser chrome --- */
+/* data-bare is set on <html> synchronously by filetree.js on ?bare URLs */
+[data-bare] #theme-toggle,
+[data-bare] .source-toggle-bar { display: none !important; }
+/* Body has no ft-open margin in bare mode (sidebar is never created) */
+
+/* --- Preview / source toggle bar --- */
+.source-toggle-bar {
+  display: flex;
+  gap: 0;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #d0d7de;
+}
+
+.toggle-btn {
+  padding: 0.35rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  color: #57606a;
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.toggle-btn:hover { color: #24292f; }
+
+.toggle-btn.active {
+  color: #0969da;
+  border-bottom-color: #0969da;
+  font-weight: 600;
+}
+
+/* HTML preview iframe */
+.html-preview-frame {
+  width: 100%;
+  height: 80vh;
+  border: 1px solid #d0d7de;
+  border-radius: 4px;
+  background: #fff;
+}
+
+/* --- Toggle bar dark mode (auto) --- */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .source-toggle-bar  { border-bottom-color: var(--dark-border); }
+  html:not([data-theme="light"]) .toggle-btn         { color: var(--dark-muted); }
+  html:not([data-theme="light"]) .toggle-btn:hover   { color: var(--dark-text); }
+  html:not([data-theme="light"]) .toggle-btn.active  { color: var(--dark-link); border-bottom-color: var(--dark-link); }
+  html:not([data-theme="light"]) .html-preview-frame { border-color: var(--dark-border); }
+}
+
+/* --- Toggle bar dark mode (forced) --- */
+html[data-theme="dark"] .source-toggle-bar  { border-bottom-color: var(--dark-border); }
+html[data-theme="dark"] .toggle-btn         { color: var(--dark-muted); }
+html[data-theme="dark"] .toggle-btn:hover   { color: var(--dark-text); }
+html[data-theme="dark"] .toggle-btn.active  { color: var(--dark-link); border-bottom-color: var(--dark-link); }
+html[data-theme="dark"] .html-preview-frame { border-color: var(--dark-border); }

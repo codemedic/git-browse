@@ -9,7 +9,8 @@ COPY src/theme-toggle.js /usr/local/lib/node_modules/markserv/lib/templates/them
 COPY src/mermaid-init.js /usr/local/lib/node_modules/markserv/lib/templates/mermaid-init.js
 COPY src/filetree.js /usr/local/lib/node_modules/markserv/lib/templates/filetree.js
 COPY src/offline-check.js /usr/local/lib/node_modules/markserv/lib/templates/offline-check.js
-RUN sed -i 's|</head>|<script src="{markserv}templates/theme-toggle.js"></script>\n<script type="module" src="{markserv}templates/mermaid-init.js"></script>\n<script src="{markserv}templates/filetree.js"></script>\n<script src="{markserv}templates/offline-check.js"></script>\n</head>|' \
+COPY src/preview-toggle.js /usr/local/lib/node_modules/markserv/lib/templates/preview-toggle.js
+RUN sed -i 's|</head>|<script src="{markserv}templates/theme-toggle.js"></script>\n<script type="module" src="{markserv}templates/mermaid-init.js"></script>\n<script src="{markserv}templates/filetree.js"></script>\n<script src="{markserv}templates/offline-check.js"></script>\n<script src="{markserv}templates/preview-toggle.js"></script>\n</head>|' \
     /usr/local/lib/node_modules/markserv/lib/templates/markdown.html
 RUN sed -i 's|</head>|<script src="{markserv}templates/theme-toggle.js"></script>\n<script src="{markserv}templates/filetree.js"></script>\n<script src="{markserv}templates/offline-check.js"></script>\n</head>|' \
     /usr/local/lib/node_modules/markserv/lib/templates/directory.html
