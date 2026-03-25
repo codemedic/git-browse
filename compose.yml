@@ -6,3 +6,4 @@ services:
     volumes:
       - ${REPO_PATH:-.}:/var/www:ro
     restart: unless-stopped
+    stop_grace_period: 1s
