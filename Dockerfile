@@ -28,4 +28,4 @@ WORKDIR /var/www
 EXPOSE 8080
 EXPOSE 35729
 
-ENTRYPOINT ["sh", "-c", "exec markserv . --address 0.0.0.0 --port 8080 --livereloadport ${LIVERELOAD_PORT:-35729}"]
+ENTRYPOINT ["sh", "-c", "exec markserv . --address 0.0.0.0 --port 8080 --livereloadport ${LIVERELOAD_PORT:-35729} --browser false"]

@@ -52,7 +52,11 @@ main() {
   echo "Serving: $repo_path"
   echo "Open:    http://localhost:$port"
 
-  exec "${compose[@]}" up --build
+  "${compose[@]}" up --build -d
+  xdg-open "http://localhost:$port" 2>/dev/null \
+    || open   "http://localhost:$port" 2>/dev/null \
+    || true
+  exec "${compose[@]}" logs -f
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
