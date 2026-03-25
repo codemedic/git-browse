@@ -15,6 +15,7 @@ RUN sed -i 's|</head>|<script src="{markserv}templates/theme-toggle.js"></script
 RUN sed -i 's|</head>|<script src="{markserv}templates/theme-toggle.js"></script>\n<script src="{markserv}templates/filetree.js"></script>\n<script src="{markserv}templates/offline-check.js"></script>\n</head>|' \
     /usr/local/lib/node_modules/markserv/lib/templates/directory.html
 
+COPY src/patches/ /tmp/patches/
 COPY src/patch-server.js /tmp/patch-server.js
 RUN node /tmp/patch-server.js
 
