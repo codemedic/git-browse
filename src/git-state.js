@@ -56,8 +56,9 @@
 
   function applyLaneTracking(commits) {
     commits.forEach(function (commit) {
-      var parents = commit.parents || [];
-      var laneIdx = commit.lane;
+      const parents = commit.parents || [];
+      const laneIdx = commit.lane;
+      const sha = commit.sha;
 
       commit.lanesBefore = _lanes.slice();
 
@@ -65,21 +66,27 @@
         _lanes[laneIdx] = null;
       } else {
         _lanes[laneIdx] = parents[0];
-        for (var j = 1; j < parents.length; j++) {
-          var pSha = parents[j];
-          var found = false;
-          for (var k = 0; k < _lanes.length; k++) {
+        for (let j = 1; j < parents.length; j++) {
+          const pSha = parents[j];
+          let found = false;
+          for (let k = 0; k < _lanes.length; k++) {
             if (_lanes[k] === pSha) { found = true; break; }
           }
           if (!found) {
-            var free = -1;
-            for (var k = 0; k < _lanes.length; k++) {
+            let free = -1;
+            for (let k = 0; k < _lanes.length; k++) {
               if (_lanes[k] === null) { free = k; break; }
             }
             if (free === -1) _lanes.push(pSha);
             else _lanes[free] = pSha;
           }
         }
+      }
+
+      // Clean up zombie lanes: when multiple lanes were waiting for this commit,
+      // indexOf() takes the first one; null out the rest so they don't draw ghost lines.
+      for (let k = 0; k < _lanes.length; k++) {
+        if (k !== laneIdx && _lanes[k] === sha) _lanes[k] = null;
       }
 
       commit.lanesAfter = _lanes.slice();
@@ -132,9 +139,9 @@
 
       // Measure each row's vertical centre (offsetTop is relative to #git-graph
       // because we set position:relative on it).
-      var rowData = [];
-      for (var i = 0; i < rows.length; i++) {
-        var commit = _commits[i];
+      const rowData = [];
+      for (let i = 0; i < rows.length; i++) {
+        const commit = _commits[i];
         if (!commit) break;
         rowData.push({
           cy: rows[i].offsetTop + rows[i].offsetHeight / 2,
@@ -146,33 +153,49 @@
       _graphSvg.setAttribute('width',  svgW);
       _graphSvg.setAttribute('height', graph.offsetHeight);
 
-      var lines = '';
-      var dots  = '';
+      let lines = '';
+      let dots  = '';
 
       // Draw lane lines between each consecutive pair of row centres.
       // Using measured centres removes gaps caused by variable row heights.
-      for (var i = 0; i < rowData.length - 1; i++) {
-        var curr  = rowData[i];
-        var next  = rowData[i + 1];
-        var after  = curr.commit.lanesAfter  || [];
-        var before = curr.commit.lanesBefore || [];
+      for (let i = 0; i < rowData.length - 1; i++) {
+        const curr   = rowData[i];
+        const next   = rowData[i + 1];
+        const after  = curr.commit.lanesAfter  || [];
+        const before = curr.commit.lanesBefore || [];
 
-        for (var j = 0; j < after.length; j++) {
+        for (let j = 0; j < after.length; j++) {
           if (!after[j]) continue;    // lane is inactive — skip
-          var x     = j * LANE_W + LANE_W / 2;
-          var color = laneColor(j);
+          const x     = j * LANE_W + LANE_W / 2;
+          const color = laneColor(j);
           // If the lane was absent BEFORE this commit it's a new branch opening
-          // at the merge dot — draw a diagonal; otherwise a straight vertical.
-          var fromX = before[j] ? x : curr.cx;
-          lines += '<line x1="' + fromX + '" y1="' + curr.cy +
-                       '" x2="' + x     + '" y2="' + next.cy +
-                       '" stroke="' + color + '" stroke-width="2"/>';
+          // at the merge dot — draw a curve from the merge dot; otherwise straight.
+          const fromX = before[j] ? x : curr.cx;
+          // If this lane converges to the next commit (branch-off point) but the
+          // next commit sits in a different lane, curve to that commit's dot.
+          const toX = (after[j] === next.commit.sha && next.commit.lane !== j)
+            ? next.cx
+            : x;
+          if (fromX === toX) {
+            // Straight vertical — no curvature needed
+            lines += '<line x1="' + fromX + '" y1="' + curr.cy +
+                         '" x2="' + toX   + '" y2="' + next.cy +
+                         '" stroke="' + color + '" stroke-width="2"/>';
+          } else {
+            // Cubic bezier: vertical tangents at both ends for a smooth S-curve
+            const midY = (curr.cy + next.cy) / 2;
+            lines += '<path d="M' + fromX + ',' + curr.cy +
+                         ' C' + fromX + ',' + midY +
+                         ' '  + toX   + ',' + midY +
+                         ' '  + toX   + ',' + next.cy +
+                         '" fill="none" stroke="' + color + '" stroke-width="2"/>';
+          }
         }
       }
 
       // Dots are rendered after lines so they sit on top
-      for (var i = 0; i < rowData.length; i++) {
-        var d = rowData[i];
+      for (let i = 0; i < rowData.length; i++) {
+        const d = rowData[i];
         dots += '<circle cx="' + d.cx + '" cy="' + d.cy + '" r="' + DOT_R +
                     '" fill="' + laneColor(d.commit.lane) + '"/>';
       }

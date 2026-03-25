@@ -141,6 +141,12 @@
 								}
 							}
 						}
+
+						// Clean up zombie lanes: when multiple lanes pointed to this commit,
+						// indexOf() picks the first; null the rest so they don't leak into future rows.
+						for (let k = 0; k < lanes.length; k++) {
+							if (k !== laneIdx && lanes[k] === fullSha) lanes[k] = null
+						}
 					})
 
 					// Strip internal fields before serialising
