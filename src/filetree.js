@@ -1,15 +1,27 @@
 (function () {
   'use strict';
 
-  var STORAGE_KEY = 'git-browse-filetree-v1';
+  var STATE_KEY  = 'git-browse-filetree-v1';
+  var CACHE_KEY  = 'git-browse-filetree-cache-v1';
+  var SCROLL_KEY = 'git-browse-filetree-scroll-v1';
 
   function getState() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+    try { return JSON.parse(localStorage.getItem(STATE_KEY) || '{}'); }
     catch (e) { return {}; }
   }
 
   function saveState(s) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+    localStorage.setItem(STATE_KEY, JSON.stringify(s));
+  }
+
+  function getCache() {
+    try { return JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); }
+    catch (e) { return {}; }
+  }
+
+  function saveCache(c) {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(c)); }
+    catch (e) {} // ignore quota errors
   }
 
   // Parse markserv directory listing HTML; hrefs are resolved to absolute paths.
@@ -21,7 +33,6 @@
     doc.querySelectorAll('li.isfolder a[href], li.isfile a[href]').forEach(function (a) {
       var href = a.getAttribute('href');
       if (!href) return;
-      // Resolve relative hrefs against the directory being listed
       if (!href.startsWith('/')) href = basePath + href;
       var name = a.textContent.trim().replace(/\/$/, '');
       if (!name) return;
@@ -31,25 +42,49 @@
     return items;
   }
 
+  // Render from cache synchronously (stable, no flicker), then silently refresh
+  // the cache in the background so the next page load gets fresh data.
+  // Falls back to a spinner + fetch when there is no cache entry yet.
   function loadChildren(dirPath, container) {
-    var spinner = document.createElement('li');
-    spinner.className = 'ft-spinner';
-    spinner.textContent = '…';
-    container.appendChild(spinner);
+    var cached = getCache()[dirPath];
 
-    fetch(dirPath)
-      .then(function (r) { return r.text(); })
-      .then(function (html) {
-        spinner.remove();
-        var items = parseListing(html, dirPath);
-        var s = getState();
-        items.forEach(function (item) {
-          container.appendChild(createNode(item, s));
-        });
-      })
-      .catch(function () {
-        spinner.textContent = 'Error loading';
+    if (cached) {
+      var s = getState();
+      cached.forEach(function (item) {
+        container.appendChild(createNode(item, s));
       });
+      // Background refresh — updates cache for the next visit, never re-renders
+      fetch(dirPath)
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+          var c = getCache();
+          c[dirPath] = parseListing(html, dirPath);
+          saveCache(c);
+        })
+        .catch(function () {});
+    } else {
+      var spinner = document.createElement('li');
+      spinner.className = 'ft-spinner';
+      spinner.textContent = '…';
+      container.appendChild(spinner);
+
+      fetch(dirPath)
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+          spinner.remove();
+          var items = parseListing(html, dirPath);
+          var c = getCache();
+          c[dirPath] = items;
+          saveCache(c);
+          var s = getState();
+          items.forEach(function (item) {
+            container.appendChild(createNode(item, s));
+          });
+        })
+        .catch(function () {
+          spinner.textContent = 'Error loading';
+        });
+    }
   }
 
   function createNode(item, s) {
@@ -84,8 +119,7 @@
         loadChildren(item.href, children);
       }
 
-      // Arrow / label click: toggle expand
-      row.addEventListener('click', function (e) {
+      row.addEventListener('click', function () {
         var s = getState();
         if (!s.expanded) s.expanded = {};
         if (children.style.display === 'none') {
@@ -141,7 +175,20 @@
     document.body.appendChild(sidebar);
     if (!s.hidden) document.body.classList.add('ft-open');
 
+    // Render tree — synchronous from cache if available, so the sidebar is
+    // stable before the first paint and scroll can be restored immediately.
     loadChildren('/', rootUl);
+
+    // Restore scroll after layout (rAF ensures the DOM has been painted)
+    requestAnimationFrame(function () {
+      var saved = sessionStorage.getItem(SCROLL_KEY);
+      if (saved) sidebar.scrollTop = parseInt(saved, 10);
+    });
+
+    // Persist scroll position before the page unloads
+    window.addEventListener('beforeunload', function () {
+      sessionStorage.setItem(SCROLL_KEY, sidebar.scrollTop);
+    });
 
     // Toggle button — visible only when sidebar is hidden
     var toggleBtn = document.createElement('button');
