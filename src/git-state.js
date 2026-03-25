@@ -268,19 +268,42 @@
       });
 
       row.addEventListener('click', function () {
-        var existing = row.querySelector('.git-diff-panel');
-        if (existing) { existing.remove(); redrawGraph(); return; }
-        var panel = document.createElement('div');
-        panel.className = 'git-diff-panel';
-        panel.textContent = 'Loading\u2026';
-        row.appendChild(panel);
+        var textEl = row.querySelector('.git-graph-text');
+        if (!textEl) return;
+
+        // Toggle: if already expanded, restore summary view
+        if (row.classList.contains('git-graph-row--expanded')) {
+          row.classList.remove('git-graph-row--expanded');
+          textEl.innerHTML = row._summaryHtml;
+          redrawGraph();
+          return;
+        }
+
+        // Save summary HTML so we can restore it later
+        row._summaryHtml = textEl.innerHTML;
+        row.classList.add('git-graph-row--expanded');
+        textEl.innerHTML = '<span class="git-meta">Loading\u2026</span>';
+
         fetchJson('/_git/diff/' + commit.sha, function (err, data) {
-          if (err || !data) { panel.textContent = 'Error loading diff'; return; }
-          if (!data.files || data.files.length === 0) { panel.textContent = 'No file changes'; return; }
-          panel.innerHTML = data.files.map(function (f) {
-            return '<span class="git-diff-status git-diff-' + esc(f.status.toLowerCase()) + '">' + esc(f.status) + '</span>' +
-              ' <a href="/' + esc(f.path) + '" class="git-diff-path">' + esc(f.path) + '</a>';
-          }).join('<br>');
+          // Bail if the user collapsed while loading
+          if (!row.classList.contains('git-graph-row--expanded')) return;
+          if (err || !data) {
+            textEl.innerHTML = '<span class="git-diff-empty">Error loading diff</span>';
+            return;
+          }
+          var filesHtml = (!data.files || data.files.length === 0)
+            ? '<span class="git-diff-empty">No file changes</span>'
+            : data.files.map(function (f) {
+                return '<span class="git-diff-status git-diff-' + esc(f.status.toLowerCase()) + '">' + esc(f.status) + '</span>' +
+                  ' <a href="/' + esc(f.path) + '" class="git-diff-path">' + esc(f.path) + '</a>';
+              }).join('<br>');
+          textEl.innerHTML =
+            '<div class="git-diff-header">' +
+              '<span class="git-sha">' + esc(commit.sha) + '</span>' +
+              '<span class="git-meta"> \u2014 ' + esc(commit.author) + ', ' + esc(commit.date) + '</span>' +
+            '</div>' +
+            '<div class="git-diff-message">' + esc(data.message || commit.message) + '</div>' +
+            '<div class="git-diff-files">' + filesHtml + '</div>';
           redrawGraph();
         });
       });
