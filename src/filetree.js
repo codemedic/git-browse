@@ -84,7 +84,7 @@
         container.appendChild(createNode(item, s));
       });
       // Background refresh — updates cache for the next visit, never re-renders
-      fetch(dirPath)
+      fetch(dirPath + '?listing')
         .then(function (r) { return r.text(); })
         .then(function (html) {
           var c = getCache();
@@ -98,7 +98,7 @@
       spinner.textContent = '…';
       container.appendChild(spinner);
 
-      fetch(dirPath)
+      fetch(dirPath + '?listing')
         .then(function (r) { return r.text(); })
         .then(function (html) {
           spinner.remove();
