@@ -166,12 +166,21 @@
 					const sha = decodedUrl.slice('/_git/diff/'.length).replace(/[^a-f0-9]/gi, '').slice(0, 40)
 					if (!sha) { res.writeHead(400); res.end('Bad sha'); return }
 					const message = gitExec(['log', '-1', '--format=%s', sha])
-					const diffOut = gitExec(['diff-tree', '-r', '--no-commit-id', '--name-status', sha])
+					// -m makes diff-tree diff against each parent; without it merge commits
+					// produce no output (git does not pick a parent automatically).
+					// Deduplicate by path — same file may appear once per parent.
+					const diffOut = gitExec(['diff-tree', '-r', '--no-commit-id', '--name-status', '-m', sha])
+					const seen = new Set()
 					const files = diffOut
-						? diffOut.split('\n').filter(Boolean).map(line => {
+						? diffOut.split('\n').filter(Boolean).reduce((acc, line) => {
 							const parts = line.split('\t')
-							return { status: parts[0] || '?', path: parts[1] || '' }
-						})
+							const filePath = parts[1] || ''
+							if (filePath && !seen.has(filePath)) {
+								seen.add(filePath)
+								acc.push({ status: parts[0] || '?', path: filePath })
+							}
+							return acc
+						}, [])
 						: []
 					jsonResponse(200, { sha, message, files })
 				} catch (e) {
