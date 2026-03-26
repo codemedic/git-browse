@@ -123,6 +123,18 @@ const NEW_GIT = fs.readFileSync('/tmp/patches/git-state.js', 'utf8').trimEnd() +
     '\n\n\t\tconst prettyPath = filePath'
 
 // ---------------------------------------------------------------------------
+// Patch 6: Register 'mermaid' as a no-op hljs language to suppress the
+// "Could not find the language 'mermaid'" warning on every rendered page.
+// markdown-it-highlightjs uses the shared highlight.js module instance, so
+// registering here at startup reaches the same object.
+// ---------------------------------------------------------------------------
+
+const OLD_HLJS = `const mdItHLJS = require('markdown-it-highlightjs')`
+
+const NEW_HLJS = `const mdItHLJS = require('markdown-it-highlightjs')
+require('highlight.js').registerLanguage('mermaid', function() { return { contains: [] } })`
+
+// ---------------------------------------------------------------------------
 
 let content = fs.readFileSync(SERVER_PATH, 'utf8')
 
@@ -156,5 +168,11 @@ if (!content.includes(OLD_GIT)) {
 }
 content = content.replace(OLD_GIT, NEW_GIT)
 
+if (!content.includes(OLD_HLJS)) {
+  console.error('Patch 6 (hljs mermaid language) target not found — server.js may have changed')
+  process.exit(1)
+}
+content = content.replace(OLD_HLJS, NEW_HLJS)
+
 fs.writeFileSync(SERVER_PATH, content, 'utf8')
-console.log('server.js patched successfully (5 patches applied)')
+console.log('server.js patched successfully (6 patches applied)')

@@ -32,6 +32,7 @@ function applyPatches (snapshot, patchSrc) {
 	const OLD_HTML     = evalOldConst(patchSrc, 'OLD_HTML')
 	const OLD_MARKDOWN = evalOldConst(patchSrc, 'OLD_MARKDOWN')
 	const OLD_GIT      = evalOldConst(patchSrc, 'OLD_GIT')
+	const OLD_HLJS     = evalOldConst(patchSrc, 'OLD_HLJS')
 
 	const NEW_FILE     = fs.readFileSync(path.join(PATCHES_DIR, 'other.js'),    'utf8').trimEnd()
 	const NEW_DIR      = fs.readFileSync(path.join(PATCHES_DIR, 'dir.js'),      'utf8').trimEnd()
@@ -39,6 +40,7 @@ function applyPatches (snapshot, patchSrc) {
 	const NEW_MARKDOWN = fs.readFileSync(path.join(PATCHES_DIR, 'markdown.js'), 'utf8').trimEnd()
 	const gitFragment  = fs.readFileSync(path.join(PATCHES_DIR, 'git-state.js'), 'utf8').trimEnd()
 	const NEW_GIT      = gitFragment + '\n\n\t\tconst prettyPath = filePath'
+	const NEW_HLJS     = evalOldConst(patchSrc, 'NEW_HLJS')
 
 	let content = snapshot
 	content = content.replace(OLD_FILE, NEW_FILE)
@@ -46,6 +48,7 @@ function applyPatches (snapshot, patchSrc) {
 	content = content.replace(OLD_HTML, NEW_HTML)
 	content = content.replace(OLD_MARKDOWN, NEW_MARKDOWN)
 	content = content.replace(OLD_GIT, NEW_GIT)
+	content = content.replace(OLD_HLJS, NEW_HLJS)
 	return content
 }
 
@@ -72,7 +75,7 @@ test('each OLD_* string is present in the server-original.js snapshot', () => {
 	const snapshot  = fs.readFileSync(FIXTURE, 'utf8')
 	const patchSrc  = fs.readFileSync(path.join(ROOT, 'src', 'patch-server.js'), 'utf8')
 
-	for (const name of ['OLD_FILE', 'OLD_DIR', 'OLD_HTML', 'OLD_MARKDOWN', 'OLD_GIT']) {
+	for (const name of ['OLD_FILE', 'OLD_DIR', 'OLD_HTML', 'OLD_MARKDOWN', 'OLD_GIT', 'OLD_HLJS']) {
 		const old = evalOldConst(patchSrc, name)
 		assert.ok(
 			snapshot.includes(old),
@@ -93,6 +96,21 @@ test('patched server.js contains /_git route handler', () => {
 	assert.ok(patched.includes('/_git/state'), 'patched server.js must contain /_git/state route')
 	assert.ok(patched.includes('/_git/log'),   'patched server.js must contain /_git/log route')
 	assert.ok(patched.includes('/_git/diff/'), 'patched server.js must contain /_git/diff/ route')
+})
+
+// ---------------------------------------------------------------------------
+// Test 7: Patch 6 — hljs mermaid language registration is present after patching
+// ---------------------------------------------------------------------------
+
+test('patched server.js registers mermaid as a no-op hljs language', () => {
+	const snapshot  = fs.readFileSync(FIXTURE, 'utf8')
+	const patchSrc  = fs.readFileSync(path.join(ROOT, 'src', 'patch-server.js'), 'utf8')
+	const patched   = applyPatches(snapshot, patchSrc)
+
+	assert.ok(
+		patched.includes("registerLanguage('mermaid'"),
+		'patched server.js must register mermaid as an hljs language'
+	)
 })
 
 // ---------------------------------------------------------------------------

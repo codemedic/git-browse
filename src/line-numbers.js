@@ -1,6 +1,6 @@
 (function () {
   document.addEventListener('DOMContentLoaded', function () {
-    var blocks = document.querySelectorAll('pre code');
+    var blocks = document.querySelectorAll('pre code:not(.language-mermaid)');
     for (var i = 0; i < blocks.length; i++) {
       addLineNumbers(blocks[i]);
     }
