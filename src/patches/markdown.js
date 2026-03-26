@@ -1,7 +1,16 @@
 		if (isMarkdown) {
 			msg('markdown', style.link(prettyPath), flags)
 			getFile(filePath).then(rawSource => {
-				return markdownToHTML(rawSource).then(renderedHtml => {
+				const fmMatch = rawSource.match(/^---\r?\n([\s\S]*?)\n---\r?\n/);
+				const content = fmMatch ? rawSource.slice(fmMatch[0].length) : rawSource;
+				const fmYaml = fmMatch ? '```yaml\n' + fmMatch[1] + '\n```' : '';
+
+				return Promise.all([
+					fmYaml ? markdownToHTML(fmYaml) : Promise.resolve(''),
+					markdownToHTML(content)
+				]).then(([fmHtml, renderedBody]) => {
+					const frontmatter = fmHtml ? '<div class="markdown-frontmatter">\n' + fmHtml + '</div>\n' : '';
+					const renderedHtml = frontmatter + renderedBody;
 					return implant(renderedHtml, implantHandlers, implantOpts).then(renderedOutput => {
 						var _maxBt = 0, _btm, _btre = /`+/g
 						while ((_btm = _btre.exec(rawSource)) !== null) { if (_btm[0].length > _maxBt) _maxBt = _btm[0].length }

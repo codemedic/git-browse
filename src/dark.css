@@ -30,6 +30,25 @@ html[data-theme="dark"] .mermaid-error-src { background: #161b22; border-color: 
    (b) user has explicitly selected dark via data-theme="dark" on <html>
 */
 
+/* --- Markdown frontmatter (YAML) --- */
+.markdown-frontmatter {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f6f8fa;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+}
+.markdown-frontmatter pre {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+.markdown-frontmatter pre code {
+  padding: 0 !important;
+  background-color: transparent !important;
+}
+
 /* --- Shared dark values as custom properties --- */
 :root {
   --dark-bg:         #0d1117;
@@ -67,6 +86,7 @@ html[data-theme="dark"] .mermaid-error-src { background: #161b22; border-color: 
   html:not([data-theme="light"]) .markdown-body pre          { background-color: var(--dark-pre-bg); }
   /* --- Syntax highlighting: github-dark theme --- */
   html:not([data-theme="light"]) .markdown-body pre code    { background: var(--dark-pre-bg); color: #c9d1d9; }
+  html:not([data-theme="light"]) .markdown-frontmatter      { background-color: var(--dark-pre-bg); border-color: var(--dark-border); }
   html:not([data-theme="light"]) .markdown-body pre code span { background: transparent; }
   html:not([data-theme="light"]) .hljs-doctag,
   html:not([data-theme="light"]) .hljs-keyword,
@@ -136,6 +156,7 @@ html[data-theme="dark"] .markdown-body .highlight pre,
 html[data-theme="dark"] .markdown-body pre          { background-color: var(--dark-pre-bg); }
 /* --- Syntax highlighting: github-dark theme --- */
 html[data-theme="dark"] .markdown-body pre code    { background: var(--dark-pre-bg); color: #c9d1d9; }
+html[data-theme="dark"] .markdown-frontmatter      { background-color: var(--dark-pre-bg); border-color: var(--dark-border); }
 html[data-theme="dark"] .markdown-body pre code span { background: transparent; }
 html[data-theme="dark"] .hljs-doctag,
 html[data-theme="dark"] .hljs-keyword,
