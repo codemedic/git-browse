@@ -14,7 +14,8 @@ COPY src/filetree.js /usr/local/lib/node_modules/markserv/lib/templates/filetree
 COPY src/offline-check.js /usr/local/lib/node_modules/markserv/lib/templates/offline-check.js
 COPY src/preview-toggle.js /usr/local/lib/node_modules/markserv/lib/templates/preview-toggle.js
 COPY src/git-state.js /usr/local/lib/node_modules/markserv/lib/templates/git-state.js
-RUN sed -i 's|</head>|<script src="{markserv}templates/theme-toggle.js"></script>\n<script type="module" src="{markserv}templates/mermaid-init.js"></script>\n<script src="{markserv}templates/filetree.js"></script>\n<script src="{markserv}templates/offline-check.js"></script>\n<script src="{markserv}templates/preview-toggle.js"></script>\n<script src="{markserv}templates/git-state.js"></script>\n</head>|' \
+COPY src/line-numbers.js /usr/local/lib/node_modules/markserv/lib/templates/line-numbers.js
+RUN sed -i 's|</head>|<script src="{markserv}templates/theme-toggle.js"></script>\n<script type="module" src="{markserv}templates/mermaid-init.js"></script>\n<script src="{markserv}templates/filetree.js"></script>\n<script src="{markserv}templates/offline-check.js"></script>\n<script src="{markserv}templates/preview-toggle.js"></script>\n<script src="{markserv}templates/git-state.js"></script>\n<script src="{markserv}templates/line-numbers.js"></script>\n</head>|' \
     /usr/local/lib/node_modules/markserv/lib/templates/markdown.html
 RUN sed -i 's|</head>|<script src="{markserv}templates/theme-toggle.js"></script>\n<script src="{markserv}templates/filetree.js"></script>\n<script src="{markserv}templates/offline-check.js"></script>\n<script src="{markserv}templates/git-state.js"></script>\n</head>|' \
     /usr/local/lib/node_modules/markserv/lib/templates/directory.html

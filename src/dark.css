@@ -765,3 +765,51 @@ html[data-theme="dark"] .git-ft-link.git-ft-active { color: #58a6ff; }
 }
 .git-ft-link:hover      { opacity: 1; background: #eaeef2; }
 .git-ft-link.git-ft-active { opacity: 1; color: #0969da; }
+
+/* --- Code line numbers --- */
+/* Expand code to its intrinsic width so every .code-line block fills the full
+   scroll width — without this, .code-line is constrained to the pre viewport
+   width and .code-ln sticky hits the containing-block edge mid-scroll. */
+pre.has-line-numbers code {
+  display: block;
+  min-width: max-content;
+}
+.code-line {
+  display: block;
+  min-height: 1.5em;   /* blank lines must occupy vertical space so numbering is consecutive */
+}
+.code-ln {
+  position: sticky;
+  left: 0;             /* pin to left edge of the pre scroll container on horizontal scroll */
+  display: inline-block;
+  width: 3.5em;        /* wide enough for 4-digit line numbers */
+  text-align: right;
+  padding-right: 0.5em;
+  margin-right: 1ch;   /* gap between gutter border and code text */
+  color: #6e7781;
+  border-right: 1px solid #d0d7de;
+  background-color: rgba(246, 248, 250, 0.85);  /* slightly transparent; matches light-mode pre background */
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  user-select: none;
+  -webkit-user-select: none;
+  vertical-align: top;
+}
+/* Extend the gutter background leftward into the pre's padding area so code
+   that has scrolled past doesn't leak through when the gutter is semi-transparent. */
+.code-ln::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 100%;             /* starts at the left edge of the gutter */
+  width: 9999px;           /* large enough to cover any pre padding */
+  background-color: #f6f8fa; /* fully opaque — just blocks leaked content, no blur needed */
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .code-ln        { color: #6e7781; border-right-color: var(--dark-border); background-color: rgba(22, 27, 34, 0.85); }
+  html:not([data-theme="light"]) .code-ln::before { background-color: #161b22; }
+}
+html[data-theme="dark"] .code-ln        { color: #6e7781; border-right-color: var(--dark-border); background-color: rgba(22, 27, 34, 0.85); }
+html[data-theme="dark"] .code-ln::before { background-color: #161b22; }
