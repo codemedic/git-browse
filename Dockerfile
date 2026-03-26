@@ -15,9 +15,10 @@ COPY src/offline-check.js /usr/local/lib/node_modules/markserv/lib/templates/off
 COPY src/preview-toggle.js /usr/local/lib/node_modules/markserv/lib/templates/preview-toggle.js
 COPY src/git-state.js /usr/local/lib/node_modules/markserv/lib/templates/git-state.js
 COPY src/line-numbers.js /usr/local/lib/node_modules/markserv/lib/templates/line-numbers.js
-RUN sed -i 's|</head>|<script src="{markserv}templates/theme-toggle.js"></script>\n<script type="module" src="{markserv}templates/mermaid-init.js"></script>\n<script src="{markserv}templates/filetree.js"></script>\n<script src="{markserv}templates/offline-check.js"></script>\n<script src="{markserv}templates/preview-toggle.js"></script>\n<script src="{markserv}templates/git-state.js"></script>\n<script src="{markserv}templates/line-numbers.js"></script>\n</head>|' \
+COPY src/picture-theme.js /usr/local/lib/node_modules/markserv/lib/templates/picture-theme.js
+RUN sed -i 's|</head>|<script src="{markserv}templates/theme-toggle.js"></script>\n<script type="module" src="{markserv}templates/mermaid-init.js"></script>\n<script src="{markserv}templates/filetree.js"></script>\n<script src="{markserv}templates/offline-check.js"></script>\n<script src="{markserv}templates/preview-toggle.js"></script>\n<script src="{markserv}templates/git-state.js"></script>\n<script src="{markserv}templates/line-numbers.js"></script>\n<script src="{markserv}templates/picture-theme.js"></script>\n</head>|' \
     /usr/local/lib/node_modules/markserv/lib/templates/markdown.html
-RUN sed -i 's|</head>|<script src="{markserv}templates/theme-toggle.js"></script>\n<script src="{markserv}templates/filetree.js"></script>\n<script src="{markserv}templates/offline-check.js"></script>\n<script src="{markserv}templates/git-state.js"></script>\n</head>|' \
+RUN sed -i 's|</head>|<script src="{markserv}templates/theme-toggle.js"></script>\n<script src="{markserv}templates/filetree.js"></script>\n<script src="{markserv}templates/offline-check.js"></script>\n<script src="{markserv}templates/git-state.js"></script>\n<script src="{markserv}templates/picture-theme.js"></script>\n</head>|' \
     /usr/local/lib/node_modules/markserv/lib/templates/directory.html
 
 COPY src/patches/ /tmp/patches/
