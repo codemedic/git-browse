@@ -22,6 +22,7 @@ Current patches (in application order):
 | 2 | `src/patches/dir.js` | `} else if (isDir) {` | Directory listing + README auto-render |
 | 3 | `src/patches/html.js` | `} else if (isHtml) {` | Sandboxed HTML preview + source toggle |
 | 4 | `src/patches/markdown.js` | `if (isMarkdown) {` | Rendered preview + raw source toggle |
+| 5 | `src/patches/git-state.js` | (virtual routes) | Git dashboard at `/_git` — branches, worktrees, commit log, file diff |
 
 When adding a new patch, inject it before `const prettyPath = filePath` (line ~426 in
 `server.js`) — immediately after the `isMarkservUrl` early-return block. This is the cleanest
@@ -43,6 +44,9 @@ directory at build time and injected into HTML templates via `sed` in the Docker
 | `src/mermaid-init.js` | Mermaid diagram rendering (ES module, loaded from CDN) |
 | `src/offline-check.js` | Offline detection, toast notification, auto-reconnect polling |
 | `src/preview-toggle.js` | Preview / source panel switcher for markdown and HTML |
+| `src/line-numbers.js` | Sticky line numbers with frosted-glass gutter for code blocks |
+| `src/picture-theme.js` | Syncs `<picture>` source selection with the `data-theme` attribute |
+| `src/git-state.js` | Git dashboard UI — branches, worktrees, commit log with inline expand, file diff |
 
 ### CSS
 
