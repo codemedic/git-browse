@@ -6,18 +6,12 @@ A Docker-based local web UI for browsing a git repository in the browser.
 
 ## Features
 
-- **Markdown rendering** — GitHub-flavoured markdown with Mermaid diagram support, YAML frontmatter, and `<picture>` dark/light image switching
-- **Syntax highlighting** — see [supported file types](#supported-file-types)
-- **Line numbers** — sticky gutter on all code blocks
-- **Dark / light / auto theme** — follows OS preference by default; toggle overrides per-session
-- **Live reload** — file changes reflect immediately; respects `.gitignore` so ignored files never trigger reloads
-- **Change tracker** — toast listing all files modified since the page was loaded; navigate to any changed file or dismiss individually
-- **File tree sidebar** — resizable, collapsible, with scroll and expand state preserved
-- **Command palette** — `Ctrl+Shift+P` / `Cmd+Shift+P`; file search (`>` prefix switches to command mode), theme switching, git dashboard, change tracker
-- **Preview / source toggle** — for markdown and HTML files
-- **Git dashboard** — space-efficient tabbed view of worktrees, branches, and tags with a paginated commit log and branch graph at `/_git`
-- **Media preview** — images, PDFs, video, and audio open inline
-- **Bare mode** — `?bare` strips all chrome; Shift+click a file link opens it bare
+- **Deep Git integration** — space-efficient dashboard for worktrees, branches, and tags with a paginated commit log and branch graph at `/_git`
+- **Change tracking** — persistent toast lists all files modified while browsing for quick navigation and review
+- **Command palette** — `Ctrl+Shift+P` / `Cmd+Shift+P` for lightning-fast file search, navigation, and theme switching
+- **GitHub-flavoured Markdown** — full support for Mermaid diagrams, YAML frontmatter, and theme-aware `<picture>` image switching
+- **Live reload** — instant updates on file changes, with native respect for `.gitignore` rules
+- **Bare mode** — `?bare` strips all chrome for a focused view; Shift+click file links to open them bare
 
 ## Requirements
 
