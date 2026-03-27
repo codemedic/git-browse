@@ -369,6 +369,7 @@ html[data-theme="dark"] a.button.back               { background-color: var(--da
 }
 .toolbar-btn:hover { background: rgba(0, 0, 0, 0.07); }
 .toolbar-icon-btn { padding: 3px 5px; }
+.toolbar-btn-icon { display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; }
 .toolbar-btn-active { color: #0969da; }
 
 @media (prefers-color-scheme: dark) {
