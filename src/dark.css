@@ -1060,23 +1060,51 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
 }
 
 .change-tree-file {
+  display: flex;
+  align-items: center;
   padding: 1px 0;
 }
-.change-tree-dismiss {
+.change-tree-file-link {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 10px;
+  flex: 1;
+  min-width: 0;
+  padding: 2px 6px;
   cursor: pointer;
   color: #0969da;
   font-size: 12px;
   border-radius: 3px;
   text-decoration: none;
   user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.change-tree-dismiss:hover {
+.change-tree-file-link:hover {
   background: #f3f4f6;
   text-decoration: underline;
+}
+.change-tree-dismiss-btn {
+  flex-shrink: 0;
+  margin-right: 4px;
+  padding: 0 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6e7781;
+  font-size: 14px;
+  line-height: 1;
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+}
+.change-tree-file:hover .change-tree-dismiss-btn {
+  opacity: 1;
+}
+.change-tree-dismiss-btn:hover {
+  background: #f3f4f6;
+  color: #cf222e;
 }
 .change-tree-file-icon { font-style: normal; }
 
@@ -1091,8 +1119,11 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
   html:not([data-theme="light"]) #change-toast-clear:hover   { background: #21262d; color: var(--dark-text); }
   html:not([data-theme="light"]) .change-tree-toggle         { color: var(--dark-muted); }
   html:not([data-theme="light"]) .change-tree-toggle:hover   { background: #21262d; }
-  html:not([data-theme="light"]) .change-tree-dismiss        { color: #58a6ff; }
-  html:not([data-theme="light"]) .change-tree-dismiss:hover  { background: #21262d; }
+  html:not([data-theme="light"]) .change-tree-file-link        { color: #58a6ff; }
+  html:not([data-theme="light"]) .change-tree-file-link:hover  { background: #21262d; }
+  html:not([data-theme="light"]) .change-tree-dismiss-btn      { color: #8b949e; }
+  html:not([data-theme="light"]) .change-tree-file:hover .change-tree-dismiss-btn { opacity: 1; }
+  html:not([data-theme="light"]) .change-tree-dismiss-btn:hover { background: #21262d; color: #f85149; }
 }
 
 /* --- Change tracker toast dark mode (forced) --- */
@@ -1105,5 +1136,8 @@ html[data-theme="dark"] #change-toast-minimize:hover,
 html[data-theme="dark"] #change-toast-clear:hover   { background: #21262d; color: var(--dark-text); }
 html[data-theme="dark"] .change-tree-toggle         { color: var(--dark-muted); }
 html[data-theme="dark"] .change-tree-toggle:hover   { background: #21262d; }
-html[data-theme="dark"] .change-tree-dismiss        { color: #58a6ff; }
-html[data-theme="dark"] .change-tree-dismiss:hover  { background: #21262d; }
+html[data-theme="dark"] .change-tree-file-link        { color: #58a6ff; }
+html[data-theme="dark"] .change-tree-file-link:hover  { background: #21262d; }
+html[data-theme="dark"] .change-tree-dismiss-btn      { color: #8b949e; }
+html[data-theme="dark"] .change-tree-file:hover .change-tree-dismiss-btn { opacity: 1; }
+html[data-theme="dark"] .change-tree-dismiss-btn:hover { background: #21262d; color: #f85149; }

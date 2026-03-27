@@ -198,18 +198,24 @@
         var li = document.createElement('li');
         li.className = 'change-tree-file';
 
-        var span = document.createElement('span');
-        span.className = 'change-tree-dismiss';
-        span.innerHTML = '<span class="change-tree-file-icon" aria-hidden="true">&#x1F4C4;</span> ' + escapeHtml(fileEntry.name);
-        span.title = 'Click to dismiss: ' + fileEntry.fullPath;
-        span.setAttribute('role', 'button');
-        span.setAttribute('tabindex', '0');
-        span.addEventListener('click', function () { removeFile(fileEntry.fullPath); });
-        span.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' || e.key === ' ') removeFile(fileEntry.fullPath);
+        var link = document.createElement('a');
+        link.className = 'change-tree-file-link';
+        link.href = '/' + fileEntry.fullPath;
+        link.title = fileEntry.fullPath;
+        link.innerHTML = '<span class="change-tree-file-icon" aria-hidden="true">&#x1F4C4;</span> ' + escapeHtml(fileEntry.name);
+
+        var dismissBtn = document.createElement('button');
+        dismissBtn.className = 'change-tree-dismiss-btn';
+        dismissBtn.setAttribute('aria-label', 'Dismiss ' + fileEntry.name);
+        dismissBtn.textContent = '\u00D7';
+        dismissBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          removeFile(fileEntry.fullPath);
         });
 
-        li.appendChild(span);
+        li.appendChild(link);
+        li.appendChild(dismissBtn);
         ul.appendChild(li);
       }(node.files[j]));
     }
