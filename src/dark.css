@@ -1276,3 +1276,24 @@ html[data-theme="dark"] .change-tree-file-link:hover  { background: #21262d; }
 html[data-theme="dark"] .change-tree-dismiss-btn      { color: #8b949e; }
 html[data-theme="dark"] .change-tree-file:hover .change-tree-dismiss-btn { opacity: 1; }
 html[data-theme="dark"] .change-tree-dismiss-btn:hover { background: #21262d; color: #f85149; }
+
+/* --- Footer --- */
+.footer {
+  margin-top: 48px;
+  padding: 32px 0;
+  border-top: 1px solid #d0d7de;
+  color: #656d76;
+  font-size: 12px;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+html[data-theme="dark"] .footer {
+  border-top-color: var(--dark-border);
+  color: var(--dark-muted);
+}
+.footer-text {
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
