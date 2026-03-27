@@ -15,7 +15,7 @@ A Docker-based local web UI for browsing a git repository in the browser.
 - **File tree sidebar** — resizable, collapsible, with scroll and expand state preserved
 - **Command palette** — `Ctrl+Shift+P` / `Cmd+Shift+P`; file search (`>` prefix switches to command mode), theme switching, git dashboard, change tracker
 - **Preview / source toggle** — for markdown and HTML files
-- **Git dashboard** — paginated commit log with branch graph at `/_git`
+- **Git dashboard** — space-efficient tabbed view of worktrees, branches, and tags with a paginated commit log and branch graph at `/_git`
 - **Media preview** — images, PDFs, video, and audio open inline
 - **Bare mode** — `?bare` strips all chrome; Shift+click a file link opens it bare
 
