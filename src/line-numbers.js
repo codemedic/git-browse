@@ -7,11 +7,44 @@
   });
 
   function addLineNumbers(block) {
+    var pre = block.parentElement;
     var html = block.innerHTML;
     // Strip trailing newline added by fenced code block rendering
     if (html.slice(-1) === '\n') html = html.slice(0, -1);
-    block.innerHTML = splitIntoLines(html);
-    block.parentElement.classList.add('has-line-numbers');
+    var res = splitIntoLines(html);
+    block.innerHTML = res.html;
+    pre.classList.add('has-line-numbers');
+    
+    // Set gutter width dynamically: max digits + 1
+    var digits = res.count.toString().length;
+    pre.style.setProperty('--gutter-width', (digits + 1) + 'ch');
+
+    // Default line-wrapping to ON
+    pre.classList.add('line-wrapping');
+
+    addToolbar(pre);
+  }
+
+  function addToolbar(pre) {
+    var toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    
+    var toggle = document.createElement('button');
+    toggle.className = 'code-toolbar-btn' + (pre.classList.contains('line-wrapping') ? ' active' : '');
+    toggle.title = 'Toggle Line Wrap';
+    toggle.innerHTML = '<i data-lucide="text-wrap"></i>';
+    
+    toggle.onclick = function() {
+      var isWrapping = pre.classList.toggle('line-wrapping');
+      toggle.classList.toggle('active', isWrapping);
+    };
+    
+    toolbar.appendChild(toggle);
+    pre.appendChild(toolbar);
+    
+    if (window.__gitBrowseIcons) {
+      window.__gitBrowseIcons.create(toolbar);
+    }
   }
 
   // Splits an HTML string into <span class="code-line">…</span> elements.
@@ -22,7 +55,7 @@
   // and no span becomes an unintended block-level ancestor.
   function splitIntoLines(html) {
     var lineNum = 1;
-    var result = '<span class="code-line">' + ln(lineNum);
+    var result = '<span class="code-line">' + ln(lineNum) + '<span class="code-content">';
     var openTags = [];  // stack of opening tag strings currently in scope
     var i = 0;
 
@@ -50,7 +83,7 @@
           result += '</' + tagName(openTags[j]) + '>';
         }
         lineNum++;
-        result += '</span><span class="code-line">' + ln(lineNum);
+        result += '</span></span><span class="code-line">' + ln(lineNum) + '<span class="code-content">';
         for (var k = 0; k < openTags.length; k++) {
           result += openTags[k];
         }
@@ -66,8 +99,8 @@
     for (var j = openTags.length - 1; j >= 0; j--) {
       result += '</' + tagName(openTags[j]) + '>';
     }
-    result += '</span>';
-    return result;
+    result += '</span></span>';
+    return { html: result, count: lineNum };
   }
 
   // Returns the gutter span HTML for a given line number.
