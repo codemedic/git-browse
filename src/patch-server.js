@@ -123,6 +123,15 @@ const NEW_GIT = fs.readFileSync('/tmp/patches/git-state.js', 'utf8').trimEnd() +
     '\n\n\t\tconst prettyPath = filePath'
 
 // ---------------------------------------------------------------------------
+// Patch 7: File search API (/_files/* virtual routes)
+// ---------------------------------------------------------------------------
+
+const OLD_FILES = `\t\tconst prettyPath = filePath`
+
+const NEW_FILES = fs.readFileSync('/tmp/patches/files.js', 'utf8').trimEnd() +
+    '\n\n\t\tconst prettyPath = filePath'
+
+// ---------------------------------------------------------------------------
 // Patch 6: Register 'mermaid' as a no-op hljs language to suppress the
 // "Could not find the language 'mermaid'" warning on every rendered page.
 // markdown-it-highlightjs uses the shared highlight.js module instance, so
@@ -174,5 +183,13 @@ if (!content.includes(OLD_HLJS)) {
 }
 content = content.replace(OLD_HLJS, NEW_HLJS)
 
+// Patch 5 (NEW_GIT) already consumed the original target and left a fresh copy at
+// the end of its block, so OLD_FILES still exists and can be matched here.
+if (!content.includes(OLD_FILES)) {
+  console.error('Patch 7 (/_files routes) target block not found — server.js may have changed')
+  process.exit(1)
+}
+content = content.replace(OLD_FILES, NEW_FILES)
+
 fs.writeFileSync(SERVER_PATH, content, 'utf8')
-console.log('server.js patched successfully (6 patches applied)')
+console.log('server.js patched successfully (7 patches applied)')

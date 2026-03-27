@@ -23,6 +23,7 @@ Current patches (in application order):
 | 3 | `src/patches/html.js` | `} else if (isHtml) {` | Sandboxed HTML preview + source toggle |
 | 4 | `src/patches/markdown.js` | `if (isMarkdown) {` | Rendered preview + raw source toggle |
 | 5 | `src/patches/git-state.js` | (virtual routes) | Git dashboard at `/_git` — branches, worktrees, commit log, file diff |
+| 7 | `src/patches/files.js`     | (virtual routes) | File search API at `/_files/search?q=` — recursive `fs.readdirSync` walk, excludes `.git/` |
 
 When adding a new patch, inject it before `const prettyPath = filePath` (line ~426 in
 `server.js`) — immediately after the `isMarkservUrl` early-return block. This is the cleanest
@@ -40,13 +41,18 @@ directory at build time and injected into HTML templates via `sed` in the Docker
 | Script | Purpose |
 |---|---|
 | `src/filetree.js` | Resizable sidebar file tree with expand/collapse, caching, scroll persistence |
-| `src/theme-toggle.js` | Dark / light / auto theme cycle button |
+| `src/toolbar.js`          | Toolbar (theme cycle, git dashboard, command palette trigger) — replaces standalone theme-toggle |
 | `src/mermaid-init.js` | Mermaid diagram rendering (ES module, loaded from CDN) |
 | `src/offline-check.js` | Offline detection, toast notification, auto-reconnect polling |
 | `src/preview-toggle.js` | Preview / source panel switcher for markdown and HTML |
 | `src/line-numbers.js` | Sticky line numbers with frosted-glass gutter for code blocks |
-| `src/picture-theme.js` | Syncs `<picture>` source selection with the `data-theme` attribute |
-| `src/git-state.js` | Git dashboard UI — branches, worktrees, commit log with inline expand, file diff |
+| `src/picture-theme.js`    | Syncs `<picture>` source selection with the `data-theme` attribute |
+| `src/git-state.js`        | Git dashboard UI — branches, worktrees, commit log with inline expand, file diff |
+| `src/command-palette.js`  | VS Code-style Command Palette (Ctrl+Shift+P / Cmd+Shift+P) — file navigation, git dashboard, theme switching |
+
+### Command Palette
+
+The `BUILTINS` array in `src/command-palette.js` is the registry of non-file commands. **When adding a major new feature, add a corresponding entry to `BUILTINS`** so users can discover and activate it from the palette. Each entry needs `label`, `icon` (inline SVG string), and `action` (function).
 
 ### CSS
 

@@ -203,29 +203,54 @@ html[data-theme="dark"] .icon.isfolder:before,
 html[data-theme="dark"] .icon.isfile:before         { background-color: var(--dark-icon); }
 html[data-theme="dark"] a.button.back               { background-color: var(--dark-border-sub); }
 
-/* --- Toggle button --- */
-#theme-toggle {
+/* --- Toolbar (theme toggle + git dashboard + command palette) --- */
+#toolbar {
   position: fixed;
   top: 12px;
   right: 12px;
   z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 2px;
   background: rgba(255, 255, 255, 0.85);
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 4px 8px;
-  cursor: pointer;
-  font-size: 15px;
-  line-height: 1.4;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  padding: 3px;
   backdrop-filter: blur(4px);
   transition: opacity 0.2s;
   opacity: 0.65;
 }
-#theme-toggle:hover { opacity: 1; }
+#toolbar:hover { opacity: 1; }
+
+.toolbar-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #1f2328;
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 3px 7px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.toolbar-btn:hover { background: rgba(0, 0, 0, 0.07); }
+.toolbar-icon-btn { padding: 3px 5px; }
+.toolbar-btn-active { color: #0969da; }
 
 @media (prefers-color-scheme: dark) {
-  html:not([data-theme="light"]) #theme-toggle { background: rgba(22, 27, 34, 0.85); border-color: #30363d; color: #e6edf3; }
+  html:not([data-theme="light"]) #toolbar                    { background: rgba(22, 27, 34, 0.85); border-color: #30363d; }
+  html:not([data-theme="light"]) .toolbar-btn                { color: #e6edf3; }
+  html:not([data-theme="light"]) .toolbar-btn:hover          { background: rgba(255, 255, 255, 0.08); }
+  html:not([data-theme="light"]) .toolbar-btn-active         { color: #58a6ff; }
 }
-html[data-theme="dark"] #theme-toggle { background: rgba(22, 27, 34, 0.85); border-color: #30363d; color: #e6edf3; }
+html[data-theme="dark"] #toolbar                    { background: rgba(22, 27, 34, 0.85); border-color: #30363d; }
+html[data-theme="dark"] .toolbar-btn                { color: #e6edf3; }
+html[data-theme="dark"] .toolbar-btn:hover          { background: rgba(255, 255, 255, 0.08); }
+html[data-theme="dark"] .toolbar-btn-active         { color: #58a6ff; }
 
 /* --- File tree sidebar (light mode defaults) --- */
 
@@ -743,9 +768,6 @@ html[data-theme="dark"] .html-preview-frame { border-color: var(--dark-border); 
   html:not([data-theme="light"]) .git-graph-row--expanded .git-graph-text { border-left-color: var(--dark-border); }
   html:not([data-theme="light"]) .git-diff-message       { color: var(--dark-text); }
   html:not([data-theme="light"]) .git-diff-path          { color: var(--dark-link); }
-  html:not([data-theme="light"]) .git-ft-link            { color: var(--dark-muted); }
-  html:not([data-theme="light"]) .git-ft-link:hover      { color: var(--dark-text); }
-  html:not([data-theme="light"]) .git-ft-link.git-ft-active { color: #58a6ff; }
 }
 
 /* ============================================================================
@@ -770,23 +792,6 @@ html[data-theme="dark"] .git-ref-head           { background: #2a1a00; color: #f
 html[data-theme="dark"] .git-graph-row--expanded .git-graph-text { border-left-color: var(--dark-border); }
 html[data-theme="dark"] .git-diff-message       { color: var(--dark-text); }
 html[data-theme="dark"] .git-diff-path          { color: var(--dark-link); }
-html[data-theme="dark"] .git-ft-link            { color: var(--dark-muted); }
-html[data-theme="dark"] .git-ft-link:hover      { color: var(--dark-text); }
-html[data-theme="dark"] .git-ft-link.git-ft-active { color: #58a6ff; }
-
-/* --- Git dashboard link in filetree header --- */
-.git-ft-link {
-  color: #57606a;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  opacity: 0.7;
-  border-radius: 4px;
-  padding: 2px 3px;
-}
-.git-ft-link:hover      { opacity: 1; background: #eaeef2; }
-.git-ft-link.git-ft-active { opacity: 1; color: #0969da; }
-
 /* --- Code line numbers --- */
 /* Expand code to its intrinsic width so every .code-line block fills the full
    scroll width — without this, .code-line is constrained to the pre viewport
@@ -834,3 +839,117 @@ pre.has-line-numbers code {
 }
 html[data-theme="dark"] .code-ln        { color: #6e7781; border-right-color: var(--dark-border); background-color: rgba(22, 27, 34, 0.85); }
 html[data-theme="dark"] .code-ln::before { background-color: #161b22; }
+
+/* --- Command Palette (light mode defaults) --- */
+
+#cmd-palette-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+}
+#cmd-palette-overlay.cmd-palette-visible { display: flex; align-items: flex-start; justify-content: center; padding-top: 12vh; }
+
+#cmd-palette {
+  width: min(640px, 92vw);
+  background: #ffffff;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+}
+
+.cmd-palette-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #d0d7de;
+}
+.cmd-palette-search-icon { display: flex; color: #57606a; flex-shrink: 0; }
+#cmd-palette-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  background: transparent;
+  color: #1f2328;
+  min-width: 0;
+}
+#cmd-palette-input::placeholder { color: #8c959f; }
+.cmd-palette-esc-hint {
+  font-size: 11px;
+  font-family: inherit;
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: #57606a;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+#cmd-palette-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.cmd-palette-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  cursor: pointer;
+  color: #1f2328;
+}
+.cmd-palette-item-selected { background: #0969da; color: #ffffff; }
+
+.cmd-palette-item-icon { display: flex; flex-shrink: 0; opacity: 0.75; }
+.cmd-palette-item-selected .cmd-palette-item-icon { opacity: 1; }
+
+.cmd-palette-item-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmd-palette-item-detail {
+  font-size: 12px;
+  color: #57606a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+.cmd-palette-item-selected .cmd-palette-item-detail { color: rgba(255, 255, 255, 0.75); }
+
+.cmd-palette-empty { padding: 12px 14px; color: #57606a; font-style: italic; }
+
+/* --- Command Palette dark mode (auto) --- */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) #cmd-palette                            { background: #161b22; border-color: var(--dark-border); }
+  html:not([data-theme="light"]) .cmd-palette-input-wrap                 { border-bottom-color: var(--dark-border); }
+  html:not([data-theme="light"]) .cmd-palette-search-icon                { color: var(--dark-muted); }
+  html:not([data-theme="light"]) #cmd-palette-input                      { color: var(--dark-text); }
+  html:not([data-theme="light"]) #cmd-palette-input::placeholder         { color: var(--dark-muted); }
+  html:not([data-theme="light"]) .cmd-palette-esc-hint                   { background: var(--dark-border-sub); border-color: var(--dark-border); color: var(--dark-muted); }
+  html:not([data-theme="light"]) .cmd-palette-item                       { color: var(--dark-text); }
+  html:not([data-theme="light"]) .cmd-palette-item-selected              { background: #1f6feb; color: #ffffff; }
+  html:not([data-theme="light"]) .cmd-palette-item-detail                { color: var(--dark-muted); }
+  html:not([data-theme="light"]) .cmd-palette-empty                      { color: var(--dark-muted); }
+}
+
+/* --- Command Palette dark mode (forced) --- */
+html[data-theme="dark"] #cmd-palette                            { background: #161b22; border-color: var(--dark-border); }
+html[data-theme="dark"] .cmd-palette-input-wrap                 { border-bottom-color: var(--dark-border); }
+html[data-theme="dark"] .cmd-palette-search-icon                { color: var(--dark-muted); }
+html[data-theme="dark"] #cmd-palette-input                      { color: var(--dark-text); }
+html[data-theme="dark"] #cmd-palette-input::placeholder         { color: var(--dark-muted); }
+html[data-theme="dark"] .cmd-palette-esc-hint                   { background: var(--dark-border-sub); border-color: var(--dark-border); color: var(--dark-muted); }
+html[data-theme="dark"] .cmd-palette-item                       { color: var(--dark-text); }
+html[data-theme="dark"] .cmd-palette-item-selected              { background: #1f6feb; color: #ffffff; }
+html[data-theme="dark"] .cmd-palette-item-detail                { color: var(--dark-muted); }
+html[data-theme="dark"] .cmd-palette-empty                      { color: var(--dark-muted); }

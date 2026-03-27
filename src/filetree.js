@@ -12,10 +12,9 @@
   var SVG_FOLDER      = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25v-8.5A1.75 1.75 0 0 0 14.25 3H7.5a.25.25 0 0 1-.2-.1l-.9-1.2C6.07 1.26 5.55 1 5 1H1.75z"/></svg>';
   var SVG_FILE        = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25V1.75zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 10 4.25V1.5H3.75zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011z"/></svg>';
   // Git branch icon (GitHub Octicons)
-  var SVG_GIT_BRANCH  = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" d="M11.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25zM4.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5zM3.5 3.25a.75.75 0 1 1 1.5 0 .75.75 0 0 1-1.5 0z"/></svg>';
 
   var STATE_KEY  = 'git-browse-filetree-v1';
-  var CACHE_KEY  = 'git-browse-filetree-cache-v1';
+  var CACHE_KEY  = 'git-browse-filetree-cache-v2'; // v2: git-aware JSON listing
   var SCROLL_KEY = 'git-browse-filetree-scroll-v1';
   var WIDTH_KEY  = 'git-browse-filetree-width-v1';
 
@@ -54,22 +53,15 @@
     catch (e) {} // ignore quota errors
   }
 
-  // Parse markserv directory listing HTML; hrefs are resolved to absolute paths.
-  // basePath must end with '/' (e.g. '/' or '/src/').
-  function parseListing(html, basePath) {
-    var parser = new DOMParser();
-    var doc = parser.parseFromString(html, 'text/html');
-    var items = [];
-    doc.querySelectorAll('li.isfolder a[href], li.isfile a[href]').forEach(function (a) {
-      var href = a.getAttribute('href');
-      if (!href) return;
-      if (!href.startsWith('/')) href = basePath + href;
-      var name = a.textContent.trim().replace(/\/$/, '');
-      if (!name) return;
-      var isDir = a.closest('li').classList.contains('isfolder');
-      items.push({ name: name, href: href, isDir: isDir });
+  // Convert a /_files/listing JSON response into the item format used by the tree.
+  function parseListing(data) {
+    return (data.entries || []).map(function (e) {
+      return { name: e.name, href: e.path, isDir: e.isDir };
     });
-    return items;
+  }
+
+  function listingUrl(dirPath) {
+    return '/_files/listing?path=' + encodeURIComponent(dirPath);
   }
 
   // Render from cache synchronously (stable, no flicker), then silently refresh
@@ -84,11 +76,11 @@
         container.appendChild(createNode(item, s));
       });
       // Background refresh — updates cache for the next visit, never re-renders
-      fetch(dirPath + '?listing')
-        .then(function (r) { return r.text(); })
-        .then(function (html) {
+      fetch(listingUrl(dirPath))
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
           var c = getCache();
-          c[dirPath] = parseListing(html, dirPath);
+          c[dirPath] = parseListing(data);
           saveCache(c);
         })
         .catch(function () {});
@@ -98,11 +90,11 @@
       spinner.textContent = '…';
       container.appendChild(spinner);
 
-      fetch(dirPath + '?listing')
-        .then(function (r) { return r.text(); })
-        .then(function (html) {
+      fetch(listingUrl(dirPath))
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
           spinner.remove();
-          var items = parseListing(html, dirPath);
+          var items = parseListing(data);
           var c = getCache();
           c[dirPath] = items;
           saveCache(c);
@@ -216,18 +208,11 @@
     header.className = 'ft-header';
     var title = document.createElement('span');
     title.textContent = 'Files';
-    // Git dashboard link — icon button linking to /_git
-    var gitLink = document.createElement('a');
-    gitLink.href = '/_git';
-    gitLink.className = 'git-ft-link' + (window.location.pathname === '/_git' ? ' git-ft-active' : '');
-    gitLink.title = 'Git dashboard';
-    gitLink.innerHTML = SVG_GIT_BRANCH;
     var closeBtn = document.createElement('button');
     closeBtn.className = 'ft-close-btn';
     closeBtn.title = 'Hide file tree';
     closeBtn.innerHTML = '&times;';
     header.appendChild(title);
-    header.appendChild(gitLink);
     header.appendChild(closeBtn);
     sidebar.appendChild(header);
 
