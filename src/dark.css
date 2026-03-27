@@ -25,10 +25,140 @@ html[data-theme="dark"] .mermaid-error summary { color: #9ca3af; }
 html[data-theme="dark"] .mermaid-error-msg { background: #1f1200; border-color: #d97706; }
 html[data-theme="dark"] .mermaid-error-src { background: #161b22; border-color: #30363d; color: #e6edf3; }
 
-/* Dark mode colours — applied when:
-   (a) OS preference is dark and user hasn't forced light, OR
-   (b) user has explicitly selected dark via data-theme="dark" on <html>
-*/
+/* --- GitHub Markdown Base (Light) --- */
+.markdown-body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: 16px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  color: #1f2328;
+  background-color: #ffffff;
+}
+
+.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.markdown-body h1 { font-size: 2em; padding-bottom: 0.3em; border-bottom: 1px solid #d0d7de; }
+.markdown-body h2 { font-size: 1.5em; padding-bottom: 0.3em; border-bottom: 1px solid #d0d7de; }
+.markdown-body h3 { font-size: 1.25em; }
+.markdown-body h4 { font-size: 1em; }
+.markdown-body h5 { font-size: 0.875em; }
+.markdown-body h6 { font-size: 0.85em; color: #656d76; }
+
+.markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body table, .markdown-body pre {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.markdown-body blockquote {
+  padding: 0 1em;
+  color: #656d76;
+  border-left: 0.25em solid #d0d7de;
+}
+
+.markdown-body ul, .markdown-body ol { padding-left: 2em; }
+.markdown-body ul ul, .markdown-body ul ol, .markdown-body ol ol, .markdown-body ol ul { margin-top: 0; margin-bottom: 0; }
+.markdown-body li { word-wrap: break-all; }
+.markdown-body li > p { margin-top: 16px; }
+.markdown-body li + li { margin-top: 0.25em; }
+
+.markdown-body code {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  white-space: break-spaces;
+  background-color: rgba(175, 184, 193, 0.2);
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+}
+
+.markdown-body pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: #f6f8fa;
+  border-radius: 6px;
+}
+
+.markdown-body pre code {
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  background-color: transparent;
+  border: 0;
+}
+
+.markdown-body table {
+  display: block;
+  width: 100%;
+  width: max-content;
+  max-width: 100%;
+  overflow: auto;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+.markdown-body table th, .markdown-body table td {
+  padding: 6px 13px;
+  border: 1px solid #d0d7de;
+}
+
+.markdown-body table tr {
+  background-color: #ffffff;
+  border-top: 1px solid #d8dee4;
+}
+
+.markdown-body table tr:nth-child(2n) { background-color: #f6f8fa; }
+
+.markdown-body img { max-width: 100%; box-sizing: content-box; background-color: #ffffff; }
+.markdown-body hr { height: 0.25em; padding: 0; margin: 24px 0; background-color: #d0d7de; border: 0; }
+
+/* --- Syntax highlighting: GitHub Light theme --- */
+.hljs-doctag,
+.hljs-keyword,
+.hljs-meta .hljs-keyword,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-variable.language_ { color: #d73a49; }
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.class_.inherited__,
+.hljs-title.function_ { color: #6f42c1; }
+.hljs-attr,
+.hljs-attribute,
+.hljs-literal,
+.hljs-meta,
+.hljs-number,
+.hljs-operator,
+.hljs-variable,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-id { color: #005cc5; }
+.hljs-regexp,
+.hljs-string,
+.hljs-meta .hljs-string { color: #032f62; }
+.hljs-built_in,
+.hljs-symbol { color: #e36209; }
+.hljs-comment,
+.hljs-code,
+.hljs-formula { color: #6a737d; }
+.hljs-name,
+.hljs-quote,
+.hljs-selector-tag,
+.hljs-selector-pseudo { color: #22863a; }
+.hljs-subst { color: #24292e; }
+.hljs-section { color: #005cc5; font-weight: bold; }
+.hljs-bullet { color: #735c0f; }
+.hljs-emphasis { color: #24292e; font-style: italic; }
+.hljs-strong { color: #24292e; font-weight: bold; }
+.hljs-addition { color: #22863a; background-color: #f0fff4; }
+.hljs-deletion { color: #b31d28; background-color: #ffeef0; }
 
 /* --- Markdown frontmatter (YAML) --- */
 .markdown-frontmatter {
@@ -66,16 +196,16 @@ html[data-theme="dark"] .mermaid-error-src { background: #161b22; border-color: 
 /* --- Auto: OS dark + no user override --- */
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"])                             { background-color: var(--dark-bg); }
-  html:not([data-theme="light"]) body                        { background-color: var(--dark-bg); }
+  html:not([data-theme="light"]) body                        { background-color: var(--dark-bg); color: var(--dark-text); }
   @media screen and (min-width: 768px) {
     html:not([data-theme="light"]) body                      { border-color: var(--dark-border); outline-color: var(--dark-bg); }
   }
-  html:not([data-theme="light"]) .markdown-body              { color: var(--dark-text); }
+  html:not([data-theme="light"]) .markdown-body              { color: var(--dark-text); background-color: var(--dark-bg); }
   html:not([data-theme="light"]) .markdown-body a            { color: var(--dark-link); }
   html:not([data-theme="light"]) .markdown-body h1,
   html:not([data-theme="light"]) .markdown-body h2           { border-bottom-color: var(--dark-border-sub); }
   html:not([data-theme="light"]) .markdown-body h6           { color: var(--dark-muted); }
-  html:not([data-theme="light"]) .markdown-body hr           { background-color: var(--dark-border-sub); border-bottom-color: var(--dark-border-sub); }
+  html:not([data-theme="light"]) .markdown-body hr           { background-color: var(--dark-border-sub); }
   html:not([data-theme="light"]) .markdown-body blockquote   { color: var(--dark-muted); border-left-color: var(--dark-border); }
   html:not([data-theme="light"]) .markdown-body table th,
   html:not([data-theme="light"]) .markdown-body table td     { border-color: var(--dark-border); }
@@ -136,16 +266,16 @@ html[data-theme="dark"] .mermaid-error-src { background: #161b22; border-color: 
 
 /* --- Forced dark: user selected dark mode explicitly --- */
 html[data-theme="dark"]                             { background-color: var(--dark-bg); }
-html[data-theme="dark"] body                        { background-color: var(--dark-bg); }
+html[data-theme="dark"] body                        { background-color: var(--dark-bg); color: var(--dark-text); }
 @media screen and (min-width: 768px) {
   html[data-theme="dark"] body                      { border-color: var(--dark-border); outline-color: var(--dark-bg); }
 }
-html[data-theme="dark"] .markdown-body              { color: var(--dark-text); }
+html[data-theme="dark"] .markdown-body              { color: var(--dark-text); background-color: var(--dark-bg); }
 html[data-theme="dark"] .markdown-body a            { color: var(--dark-link); }
 html[data-theme="dark"] .markdown-body h1,
 html[data-theme="dark"] .markdown-body h2           { border-bottom-color: var(--dark-border-sub); }
 html[data-theme="dark"] .markdown-body h6           { color: var(--dark-muted); }
-html[data-theme="dark"] .markdown-body hr           { background-color: var(--dark-border-sub); border-bottom-color: var(--dark-border-sub); }
+html[data-theme="dark"] .markdown-body hr           { background-color: var(--dark-border-sub); }
 html[data-theme="dark"] .markdown-body blockquote   { color: var(--dark-muted); border-left-color: var(--dark-border); }
 html[data-theme="dark"] .markdown-body table th,
 html[data-theme="dark"] .markdown-body table td     { border-color: var(--dark-border); }
@@ -491,9 +621,11 @@ body {
   margin: 16px 32px;
 }
 /* Constrain text content (markdown, code) but not media viewer pages */
-article.markdown-body:not(:has(.bin-viewer)) {
-  max-width: 978px;
+article.markdown-body:not(:has(.bin-viewer)),
+.markdown-body:not(:has(.bin-viewer)) {
+  max-width: 1012px;
   margin: 0 auto;
+  padding: 45px;
 }
 .bin-viewer {
   width: 100%;
