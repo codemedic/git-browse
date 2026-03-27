@@ -16,11 +16,19 @@
   // currently displayed in the browser.
   // Directory views (pathname ends with '/') always allow reload — the listing
   // may have changed.  Special routes (/_git, /_files) never reload on file changes.
+  // Matches markserv's dir.js readme lookup: readme[.md|.markdown|.txt]
+  var README_RE = /^readme(\.md|\.markdown|\.txt)?$/i;
+
   function isCurrentFile(rawPath) {
     var pathname = window.location.pathname;
     if (pathname.startsWith('/_')) return false;      // virtual routes — never reload
-    if (pathname.endsWith('/'))    return false;      // directory listings — never reload, use toast
     var rel = normalizePath(rawPath);
+    if (pathname.endsWith('/')) {
+      // Directory view: only reload if the changed file is the readme being rendered.
+      var dirRel = pathname.replace(/^\//, '');       // '' for root, 'bla/' for /bla/
+      if (rel.indexOf(dirRel) !== 0) return false;   // not inside this directory
+      return README_RE.test(rel.slice(dirRel.length));
+    }
     var current = pathname.replace(/^\//, '');
     return rel === current;
   }
