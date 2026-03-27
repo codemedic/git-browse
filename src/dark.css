@@ -959,7 +959,8 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
   position: fixed;
   bottom: 24px;
   right: 24px;
-  width: 300px;
+  min-width: 300px;
+  max-width: 520px;
   max-height: 60vh;
   background: #ffffff;
   border: 1px solid #d0d7de;
@@ -979,19 +980,22 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px;
-  border-bottom: 1px solid #d0d7de;
+  padding: 4px 8px;
+  background: #dbeafe;
+  border-radius: 7px 7px 0 0;
+  border-bottom: 1px solid #bfdbfe;
   gap: 8px;
   flex-shrink: 0;
 }
 #change-toast.change-toast-minimized #change-toast-header {
+  border-radius: 7px;
   border-bottom: none;
 }
 
 #change-toast-title {
   font-weight: 600;
   font-size: 12px;
-  color: #57606a;
+  color: #1e40af;
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -1007,9 +1011,9 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
 #change-toast-minimize,
 #change-toast-clear {
   background: none;
-  border: 1px solid #d0d7de;
+  border: 1px solid #93c5fd;
   border-radius: 4px;
-  color: #57606a;
+  color: #1d4ed8;
   font-size: 11px;
   cursor: pointer;
   padding: 1px 6px;
@@ -1017,8 +1021,9 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
 }
 #change-toast-minimize:hover,
 #change-toast-clear:hover {
-  background: #f3f4f6;
-  color: #24292f;
+  background: #bfdbfe;
+  color: #1e3a8a;
+  border-color: #60a5fa;
 }
 
 #change-toast-body {
@@ -1078,8 +1083,6 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
   text-decoration: none;
   user-select: none;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .change-tree-file-link:hover {
   background: #f3f4f6;
@@ -1111,12 +1114,12 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
 /* --- Change tracker toast dark mode (auto) --- */
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"]) #change-toast               { background: #161b22; border-color: var(--dark-border); }
-  html:not([data-theme="light"]) #change-toast-header        { border-bottom-color: var(--dark-border); }
-  html:not([data-theme="light"]) #change-toast-title         { color: var(--dark-muted); }
+  html:not([data-theme="light"]) #change-toast-header        { background: #1d2d3e; border-bottom-color: #264a70; }
+  html:not([data-theme="light"]) #change-toast-title         { color: #79c0ff; }
   html:not([data-theme="light"]) #change-toast-minimize,
-  html:not([data-theme="light"]) #change-toast-clear         { border-color: var(--dark-border); color: var(--dark-muted); }
+  html:not([data-theme="light"]) #change-toast-clear         { border-color: #264a70; color: #79c0ff; }
   html:not([data-theme="light"]) #change-toast-minimize:hover,
-  html:not([data-theme="light"]) #change-toast-clear:hover   { background: #21262d; color: var(--dark-text); }
+  html:not([data-theme="light"]) #change-toast-clear:hover   { background: #264a70; color: #cae8ff; border-color: #388bfd; }
   html:not([data-theme="light"]) .change-tree-toggle         { color: var(--dark-muted); }
   html:not([data-theme="light"]) .change-tree-toggle:hover   { background: #21262d; }
   html:not([data-theme="light"]) .change-tree-file-link        { color: #58a6ff; }
@@ -1128,12 +1131,12 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
 
 /* --- Change tracker toast dark mode (forced) --- */
 html[data-theme="dark"] #change-toast               { background: #161b22; border-color: var(--dark-border); }
-html[data-theme="dark"] #change-toast-header        { border-bottom-color: var(--dark-border); }
-html[data-theme="dark"] #change-toast-title         { color: var(--dark-muted); }
+html[data-theme="dark"] #change-toast-header        { background: #1d2d3e; border-bottom-color: #264a70; }
+html[data-theme="dark"] #change-toast-title         { color: #79c0ff; }
 html[data-theme="dark"] #change-toast-minimize,
-html[data-theme="dark"] #change-toast-clear         { border-color: var(--dark-border); color: var(--dark-muted); }
+html[data-theme="dark"] #change-toast-clear         { border-color: #264a70; color: #79c0ff; }
 html[data-theme="dark"] #change-toast-minimize:hover,
-html[data-theme="dark"] #change-toast-clear:hover   { background: #21262d; color: var(--dark-text); }
+html[data-theme="dark"] #change-toast-clear:hover   { background: #264a70; color: #cae8ff; border-color: #388bfd; }
 html[data-theme="dark"] .change-tree-toggle         { color: var(--dark-muted); }
 html[data-theme="dark"] .change-tree-toggle:hover   { background: #21262d; }
 html[data-theme="dark"] .change-tree-file-link        { color: #58a6ff; }
