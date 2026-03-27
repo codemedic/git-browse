@@ -19,7 +19,7 @@
   function isCurrentFile(rawPath) {
     var pathname = window.location.pathname;
     if (pathname.startsWith('/_')) return false;      // virtual routes — never reload
-    if (pathname.endsWith('/'))   return true;         // directory listing — always reload
+    if (pathname.endsWith('/'))    return false;      // directory listings — never reload, use toast
     var rel = normalizePath(rawPath);
     var current = pathname.replace(/^\//, '');
     return rel === current;
