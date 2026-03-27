@@ -6,12 +6,14 @@ Powered by [markserv](https://github.com/markserv/markserv).
 
 ## Features
 
-- **Markdown rendering** — GitHub-flavoured markdown with Mermaid diagram support and `<picture>` dark/light image switching
+- **Markdown rendering** — GitHub-flavoured markdown with Mermaid diagram support, YAML frontmatter, and `<picture>` dark/light image switching
 - **Syntax highlighting** — see [supported file types](#supported-file-types)
 - **Line numbers** — sticky gutter on all code blocks
 - **Dark / light / auto theme** — follows OS preference by default; toggle overrides per-session
-- **Live reload** — file changes reflect immediately in the browser
+- **Live reload** — file changes reflect immediately; respects `.gitignore` so ignored files never trigger reloads
+- **Change tracker** — toast listing all files modified since the page was loaded; navigate to any changed file or dismiss individually
 - **File tree sidebar** — resizable, collapsible, with scroll and expand state preserved
+- **Command palette** — `Ctrl+Shift+P` / `Cmd+Shift+P`; file search (`>` prefix switches to command mode), theme switching, git dashboard, change tracker
 - **Preview / source toggle** — for markdown and HTML files
 - **Git dashboard** — paginated commit log with branch graph at `/_git`
 - **Media preview** — images, PDFs, video, and audio open inline
