@@ -741,6 +741,75 @@ html[data-theme="dark"] .html-preview-frame { border-color: var(--dark-border); 
   font-size: 12px;
 }
 
+/* --- Tabs --- */
+.git-tabs {
+  margin-bottom: 16px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.git-tabs-header {
+  display: flex;
+  background: #f6f8fa;
+  border-bottom: 1px solid #d0d7de;
+}
+.git-tab-btn {
+  padding: 6px 14px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: #57606a;
+  border-right: 1px solid #d0d7de;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.git-tab-btn:hover { background: #eaeef2; }
+.git-tab-btn.active {
+  background: #ffffff;
+  color: #1f2328;
+  border-bottom: 2px solid #fd8c73;
+  margin-bottom: -1px;
+  padding-bottom: 5px;
+}
+.git-tab-btn svg.lucide {
+  width: 14px;
+  height: 14px;
+}
+.git-tab-content {
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 12px;
+}
+.git-tab-panel { display: none; }
+.git-tab-panel.active { display: block; }
+
+.git-tab-panel .git-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.git-tab-panel .git-table td,
+.git-tab-panel .git-table th {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .git-tabs { border-color: var(--dark-border); }
+  html:not([data-theme="light"]) .git-tabs-header { background: #161b22; border-bottom-color: var(--dark-border); }
+  html:not([data-theme="light"]) .git-tab-btn { color: var(--dark-muted); border-right-color: var(--dark-border); }
+  html:not([data-theme="light"]) .git-tab-btn:hover { background: #21262d; }
+  html:not([data-theme="light"]) .git-tab-btn.active { background: var(--dark-bg); color: var(--dark-text); border-bottom-color: #f78166; }
+}
+html[data-theme="dark"] .git-tabs { border-color: var(--dark-border); }
+html[data-theme="dark"] .git-tabs-header { background: #161b22; border-bottom-color: var(--dark-border); }
+html[data-theme="dark"] .git-tab-btn { color: var(--dark-muted); border-right-color: var(--dark-border); }
+html[data-theme="dark"] .git-tab-btn:hover { background: #21262d; }
+html[data-theme="dark"] .git-tab-btn.active { background: var(--dark-bg); color: var(--dark-text); border-bottom-color: #f78166; }
+
 /* --- Sections --- */
 .git-sections { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
 .git-section  { flex: 1; min-width: 240px; }

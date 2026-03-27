@@ -13,6 +13,7 @@
   var LANE_W = 16;   // pixels per lane column in the graph SVG
   var DOT_R  = 4;    // commit dot radius
   var PAGE   = 40;   // commits per page
+  var PAGE_REFS = 20; // branches/tags per page
 
   // 6 distinct lane colours — same in light and dark, adjusted for contrast
   var LANE_COLORS = ['#0969da', '#1a7f37', '#cf222e', '#8250df', '#bf8700', '#0550ae'];
@@ -32,6 +33,13 @@
   var _loading    = false;
   var _graphSvg   = null;   // single SVG element spanning the whole graph
   var _lanes      = [];     // client-side lane tracking state
+
+  var _branches = [];
+  var _branchesHasMore = true;
+  var _branchesLoading = false;
+  var _tags = [];
+  var _tagsHasMore = true;
+  var _tagsLoading = false;
 
   // ---------------------------------------------------------------------------
   // Utilities
@@ -85,8 +93,6 @@
         }
       }
 
-      // Clean up zombie lanes: when multiple lanes were waiting for this commit,
-      // indexOf() takes the first one; null out the rest so they don't draw ghost lines.
       for (let k = 0; k < _lanes.length; k++) {
         if (k !== laneIdx && _lanes[k] === sha) _lanes[k] = null;
       }
@@ -99,17 +105,12 @@
   // Single-SVG graph renderer
   // ---------------------------------------------------------------------------
 
-  // Create a single absolutely-positioned SVG that spans the graph container.
-  // All lines and dots are drawn in this one SVG by measuring actual DOM row
-  // positions — avoids gaps caused by per-row SVGs with fixed heights.
   function setupGraphCanvas(graphEl) {
     var ns  = 'http://www.w3.org/2000/svg';
     var svg = document.createElementNS(ns, 'svg');
     svg.id  = 'git-graph-canvas';
     svg.setAttribute('xmlns', ns);
     svg.setAttribute('aria-hidden', 'true');
-    // overflow:visible lets lines extend slightly past the SVG bounds during
-    // layout changes without clipping.
     svg.style.cssText = 'position:absolute;left:0;top:0;pointer-events:none;overflow:visible';
     graphEl.style.position = 'relative';
     graphEl.insertBefore(svg, graphEl.firstChild);
@@ -124,7 +125,6 @@
       var rows = graph.querySelectorAll('.git-graph-row');
       if (!rows.length) return;
 
-      // Compute max active lane index across all rendered commits
       var maxLane = 0;
       _commits.forEach(function (c) {
         if (!c) return;
@@ -134,13 +134,10 @@
       });
 
       var svgW       = (maxLane + 1) * LANE_W + LANE_W;
-      var paddingLeft = svgW + 8;  // 8 px gap between graph lines and commit text
+      var paddingLeft = svgW + 8;
 
-      // Push text to the right so it doesn't overlap the SVG lane columns
       graph.style.paddingLeft = paddingLeft + 'px';
 
-      // Measure each row's vertical centre (offsetTop is relative to #git-graph
-      // because we set position:relative on it).
       const rowData = [];
       for (let i = 0; i < rows.length; i++) {
         const commit = _commits[i];
@@ -158,8 +155,6 @@
       let lines = '';
       let dots  = '';
 
-      // Draw lane lines between each consecutive pair of row centres.
-      // Using measured centres removes gaps caused by variable row heights.
       for (let i = 0; i < rowData.length - 1; i++) {
         const curr   = rowData[i];
         const next   = rowData[i + 1];
@@ -167,45 +162,27 @@
         const before = curr.commit.lanesBefore || [];
 
         for (let j = 0; j < after.length; j++) {
-          if (!after[j]) continue;    // lane is inactive — skip
+          if (!after[j]) continue;
           const x     = j * LANE_W + LANE_W / 2;
           const color = laneColor(j);
-          // If the lane was absent BEFORE this commit it's a new branch opening
-          // at the merge dot — draw a curve from the merge dot; otherwise straight.
           const fromX = before[j] ? x : curr.cx;
-          // If this lane converges to the next commit (branch-off point) but the
-          // next commit sits in a different lane, curve to that commit's dot.
-          const toX = (after[j] === next.commit.sha && next.commit.lane !== j)
-            ? next.cx
-            : x;
+          const toX = (after[j] === next.commit.sha && next.commit.lane !== j) ? next.cx : x;
           if (fromX === toX) {
-            // Straight vertical — no curvature needed
-            lines += '<line x1="' + fromX + '" y1="' + curr.cy +
-                         '" x2="' + toX   + '" y2="' + next.cy +
-                         '" stroke="' + color + '" stroke-width="2"/>';
+            lines += '<line x1="' + fromX + '" y1="' + curr.cy + '" x2="' + toX   + '" y2="' + next.cy + '" stroke="' + color + '" stroke-width="2"/>';
           } else {
-            // Cubic bezier: vertical tangents at both ends for a smooth S-curve
             const midY = (curr.cy + next.cy) / 2;
-            lines += '<path d="M' + fromX + ',' + curr.cy +
-                         ' C' + fromX + ',' + midY +
-                         ' '  + toX   + ',' + midY +
-                         ' '  + toX   + ',' + next.cy +
-                         '" fill="none" stroke="' + color + '" stroke-width="2"/>';
+            lines += '<path d="M' + fromX + ',' + curr.cy + ' C' + fromX + ',' + midY + ' '  + toX   + ',' + midY + ' '  + toX   + ',' + next.cy + '" fill="none" stroke="' + color + '" stroke-width="2"/>';
           }
         }
       }
 
-      // Dots are rendered after lines so they sit on top
       for (let i = 0; i < rowData.length; i++) {
         const d = rowData[i];
-        dots += '<circle cx="' + d.cx + '" cy="' + d.cy + '" r="' + DOT_R +
-                    '" fill="' + laneColor(d.commit.lane) + '"/>';
+        dots += '<circle cx="' + d.cx + '" cy="' + d.cy + '" r="' + DOT_R + '" fill="' + laneColor(d.commit.lane) + '"/>';
       }
 
       _graphSvg.innerHTML = lines + dots;
 
-      // Hover-highlight ring — a single invisible circle that moves to whichever
-      // row the mouse is over.  Re-appended after every innerHTML reset.
       var hlNs = 'http://www.w3.org/2000/svg';
       var hl = document.createElementNS(hlNs, 'circle');
       hl.id = 'git-highlight-dot';
@@ -236,7 +213,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Commit rows — text only; the SVG is drawn separately by redrawGraph()
+  // Commit rows
   // ---------------------------------------------------------------------------
 
   function renderCommitRows(commits, container) {
@@ -273,7 +250,6 @@
         var textEl = row.querySelector('.git-graph-text');
         if (!textEl) return;
 
-        // Toggle: if already expanded, restore summary view
         if (row.classList.contains('git-graph-row--expanded')) {
           row.classList.remove('git-graph-row--expanded');
           textEl.innerHTML = row._summaryHtml;
@@ -281,13 +257,11 @@
           return;
         }
 
-        // Save summary HTML so we can restore it later
         row._summaryHtml = textEl.innerHTML;
         row.classList.add('git-graph-row--expanded');
         textEl.innerHTML = '<span class="git-meta">Loading\u2026</span>';
 
         fetchJson('/_git/diff/' + commit.sha, function (err, data) {
-          // Bail if the user collapsed while loading
           if (!row.classList.contains('git-graph-row--expanded')) return;
           if (err || !data) {
             textEl.innerHTML = '<span class="git-diff-empty">Error loading diff</span>';
@@ -317,7 +291,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Load a page of commits
+  // Data Fetching
   // ---------------------------------------------------------------------------
 
   function loadCommits(skip, cb) {
@@ -329,6 +303,28 @@
       _totalCount = data.totalCount || 0;
       _hasMore    = data.hasMore;
       if (cb) cb(data.commits || []);
+    });
+  }
+
+  function loadBranches(skip, cb) {
+    if (_branchesLoading) return;
+    _branchesLoading = true;
+    fetchJson('/_git/branches?skip=' + skip + '&count=' + PAGE_REFS, function (err, data) {
+      _branchesLoading = false;
+      if (err || !data) { if (cb) cb(false); return; }
+      _branchesHasMore = data.hasMore;
+      if (cb) cb(data.branches || []);
+    });
+  }
+
+  function loadTags(skip, cb) {
+    if (_tagsLoading) return;
+    _tagsLoading = true;
+    fetchJson('/_git/tags?skip=' + skip + '&count=' + PAGE_REFS, function (err, data) {
+      _tagsLoading = false;
+      if (err || !data) { if (cb) cb(false); return; }
+      _tagsHasMore = data.hasMore;
+      if (cb) cb(data.tags || []);
     });
   }
 
@@ -346,9 +342,9 @@
       (state.stashCount ? '<span class="git-stash-badge">' + state.stashCount + ' stash' + (state.stashCount > 1 ? 'es' : '') + '</span>' : '');
   }
 
-  function buildBranches(branches) {
-    if (!branches || branches.length === 0) return '<p class="git-empty">No local branches found.</p>';
-    var rows = branches.map(function (b) {
+  function renderBranchRows(branches, tbody) {
+    if (!branches || branches.length === 0) return;
+    var html = branches.map(function (b) {
       var status = '';
       if (b.gone) {
         status = '<span class="git-gone">gone</span>';
@@ -358,26 +354,24 @@
       }
       return '<tr><td>' + esc(b.name) + '</td><td>' + esc(b.upstream) + '</td><td>' + (status || '<span class="git-sync">\u2713</span>') + '</td></tr>';
     }).join('');
-    return '<table class="git-table"><thead><tr><th>Branch</th><th>Upstream</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    tbody.insertAdjacentHTML('beforeend', html);
   }
 
-  function buildTags(tags) {
-    if (!tags || tags.length === 0) return '';
-    var items = tags.map(function (t) {
-      return '<li class="git-tag-item"><span class="git-ref-pill git-ref-tag">' + esc(t.name) + '</span> <span class="git-sha">' + esc(t.sha) + '</span> <span class="git-meta">' + esc(t.date) + '</span></li>';
+  function renderTagRows(tags, tbody) {
+    if (!tags || tags.length === 0) return;
+    var html = tags.map(function (t) {
+      return '<tr><td><span class="git-ref-pill git-ref-tag">' + esc(t.name) + '</span></td><td><span class="git-sha">' + esc(t.sha) + '</span></td><td><span class="git-meta">' + esc(t.date) + '</span></td></tr>';
     }).join('');
-    return '<ul class="git-tag-list">' + items + '</ul>';
+    tbody.insertAdjacentHTML('beforeend', html);
   }
 
   function buildWorktrees(worktrees) {
-    // Index 0 is always the main worktree (/var/www inside the container) — not useful to show
     var linked = worktrees ? worktrees.slice(1) : [];
-    if (!linked.length) return '';
+    if (!linked.length) return '<p class="git-empty" style="padding:12px">No linked worktrees found.</p>';
     var rows = linked.map(function (wt) {
       return '<tr><td class="git-wt-path">' + esc(wt.path) + '</td><td>' + esc(wt.branch) + '</td><td><span class="git-sha">' + esc(wt.sha) + '</span></td></tr>';
     }).join('');
-    return '<h2 class="git-section-heading">Worktrees</h2>' +
-      '<table class="git-table git-wt-table"><thead><tr><th>Path</th><th>Branch</th><th>Commit</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    return '<table class="git-table git-wt-table"><thead><tr><th>Path</th><th>Branch</th><th>Commit</th></tr></thead><tbody>' + rows + '</tbody></table>';
   }
 
   // ---------------------------------------------------------------------------
@@ -390,22 +384,47 @@
     el.textContent = _totalCount > 0 ? '(' + _commits.length + ' / ' + _totalCount + ')' : '';
   }
 
+  function setupTabs(dash) {
+    var tabs = dash.querySelectorAll('.git-tab-btn');
+    var panels = dash.querySelectorAll('.git-tab-panel');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var target = this.getAttribute('data-tab');
+        tabs.forEach(function (t) { t.classList.remove('active'); });
+        panels.forEach(function (p) { p.classList.remove('active'); });
+        this.classList.add('active');
+        dash.querySelector('.git-tab-panel[data-tab="' + target + '"]').classList.add('active');
+      });
+    });
+  }
+
   function renderDashboard(state, commits) {
     var dash = document.getElementById('git-dashboard');
     if (!dash) return;
 
     dash.innerHTML =
       '<div id="git-header-bar" class="git-header-bar"></div>' +
-      '<div class="git-sections">' +
-        '<section class="git-section">' +
-          '<h2 class="git-section-heading">Branches</h2>' +
-          '<div id="git-branches">' + buildBranches(state.branches) + '</div>' +
-        '</section>' +
-        (state.tags && state.tags.length > 0
-          ? '<section class="git-section"><h2 class="git-section-heading">Tags</h2><div id="git-tags">' + buildTags(state.tags) + '</div></section>'
-          : '') +
-        '<div id="git-worktrees">' + buildWorktrees(state.worktrees) + '</div>' +
+      '<div class="git-tabs">' +
+        '<div class="git-tabs-header">' +
+          '<button class="git-tab-btn active" data-tab="worktrees"><i data-lucide="layers"></i> Worktrees</button>' +
+          '<button class="git-tab-btn" data-tab="branches"><i data-lucide="git-branch"></i> Branches</button>' +
+          '<button class="git-tab-btn" data-tab="tags"><i data-lucide="tag"></i> Tags</button>' +
+        '</div>' +
+        '<div class="git-tab-content">' +
+          '<div class="git-tab-panel active" data-tab="worktrees">' +
+            '<div id="git-worktrees">' + buildWorktrees(state.worktrees) + '</div>' +
+          '</div>' +
+          '<div class="git-tab-panel" data-tab="branches">' +
+            '<table class="git-table"><thead><tr><th>Branch</th><th>Upstream</th><th>Status</th></tr></thead><tbody id="git-branches-body"></tbody></table>' +
+            '<div id="git-branches-sentinel" class="git-scroll-sentinel"></div>' +
+          '</div>' +
+          '<div class="git-tab-panel" data-tab="tags">' +
+            '<table class="git-table"><thead><tr><th>Tag</th><th>SHA</th><th>Date</th></tr></thead><tbody id="git-tags-body"></tbody></table>' +
+            '<div id="git-tags-sentinel" class="git-scroll-sentinel"></div>' +
+          '</div>' +
+        '</div>' +
       '</div>' +
+
       '<section class="git-section">' +
         '<h2 class="git-section-heading">Commits <span id="git-commit-count" class="git-commit-count"></span></h2>' +
         '<div id="git-graph"></div>' +
@@ -413,32 +432,65 @@
       '</section>';
 
     buildHeaderBar(state);
+    setupTabs(dash);
+    if (window.__gitBrowseIcons) window.__gitBrowseIcons.create(dash);
 
     var graph = document.getElementById('git-graph');
     setupGraphCanvas(graph);
     renderCommitRows(commits, graph);
     updateCommitCount();
 
-    // Infinite scroll: load more commits when the sentinel enters the viewport
-    var sentinel = document.getElementById('git-scroll-sentinel');
-    if (sentinel && window.IntersectionObserver) {
-      var observer = new IntersectionObserver(function (entries) {
+    // IntersectionObservers for infinite scroll
+    if (window.IntersectionObserver) {
+      // Commits
+      var commitSentinel = document.getElementById('git-scroll-sentinel');
+      var commitObserver = new IntersectionObserver(function (entries) {
         if (entries[0].isIntersecting && _hasMore && !_loading) {
           loadCommits(_commits.length, function (newCommits) {
             if (!newCommits) return;
             _commits = _commits.concat(newCommits);
             renderCommitRows(newCommits, graph);
             updateCommitCount();
-            if (!_hasMore) observer.disconnect();
+            if (!_hasMore) commitObserver.disconnect();
           });
         }
       }, { rootMargin: '200px' });
-      observer.observe(sentinel);
+      commitObserver.observe(commitSentinel);
+
+      // Branches
+      var branchSentinel = document.getElementById('git-branches-sentinel');
+      var branchBody = document.getElementById('git-branches-body');
+      var branchObserver = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting && _branchesHasMore && !_branchesLoading) {
+          loadBranches(_branches.length, function (newBranches) {
+            if (!newBranches) return;
+            _branches = _branches.concat(newBranches);
+            renderBranchRows(newBranches, branchBody);
+            if (!_branchesHasMore) branchObserver.disconnect();
+          });
+        }
+      }, { rootMargin: '100px' });
+      branchObserver.observe(branchSentinel);
+
+      // Tags
+      var tagSentinel = document.getElementById('git-tags-sentinel');
+      var tagBody = document.getElementById('git-tags-body');
+      var tagObserver = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting && _tagsHasMore && !_tagsLoading) {
+          loadTags(_tags.length, function (newTags) {
+            if (!newTags) return;
+            _tags = _tags.concat(newTags);
+            renderTagRows(newTags, tagBody);
+            if (!_tagsHasMore) tagObserver.disconnect();
+          });
+        }
+      }, { rootMargin: '100px' });
+      tagObserver.observe(tagSentinel);
     }
   }
 
   // ---------------------------------------------------------------------------
-  // Polling: refresh state every 5 s; reload log if refs changed
+  // Polling
   // ---------------------------------------------------------------------------
 
   function startPolling() {
@@ -446,12 +498,11 @@
       fetchJson('/_git/state', function (err, newState) {
         if (err || !newState) return;
         var changed = !_state ||
-          newState.headSha !== _state.headSha ||
-          JSON.stringify(newState.branches) !== JSON.stringify(_state.branches);
+          newState.headSha !== _state.headSha;
+        // Branches/Tags polling removed for now to favor manual/event-based refresh
+        // but we keep headSha tracking for the graph.
         _state = newState;
         buildHeaderBar(newState);
-        var branchEl = document.getElementById('git-branches');
-        if (branchEl) branchEl.innerHTML = buildBranches(newState.branches);
         if (changed) {
           _commits = [];
           _lanes   = [];
@@ -460,7 +511,6 @@
             _commits = commits;
             var graph = document.getElementById('git-graph');
             if (graph) {
-              // Remove only commit rows; leave the SVG canvas in place
               graph.querySelectorAll('.git-graph-row').forEach(function (r) { r.remove(); });
               renderCommitRows(commits, graph);
               updateCommitCount();
@@ -468,7 +518,7 @@
           });
         }
       });
-    }, 5000); // 5 s polling interval
+    }, 5000);
   }
 
   // ---------------------------------------------------------------------------

@@ -271,19 +271,7 @@ app.use('/_git', (req, res, next) => {
     try {
       const head = gitExec(['symbolic-ref', '--short', 'HEAD']) || gitExec(['rev-parse', '--short', 'HEAD'])
       const headSha = gitExec(['rev-parse', '--short', 'HEAD'])
-      const branchLines = gitExec(['for-each-ref', '--format=%(refname:short)\t%(upstream:short)\t%(upstream:track)', 'refs/heads/'])
-      const branches = branchLines ? branchLines.split('\n').filter(Boolean).map(line => {
-        const parts = line.split('\t')
-        const track = (parts[2] || '').replace(/^\[|\]$/g, '')
-        const aheadM = track.match(/ahead (\d+)/)
-        const behindM = track.match(/behind (\d+)/)
-        return { name: parts[0] || '', upstream: parts[1] || '', ahead: aheadM ? parseInt(aheadM[1], 10) : 0, behind: behindM ? parseInt(behindM[1], 10) : 0, gone: track === 'gone' }
-      }) : []
-      const tagLines = gitExec(['for-each-ref', '--count=30', '--sort=-creatordate', '--format=%(refname:short)\t%(objectname:short)\t%(creatordate:relative)', 'refs/tags/'])
-      const tags = tagLines ? tagLines.split('\n').filter(Boolean).map(line => {
-        const parts = line.split('\t')
-        return { name: parts[0] || '', sha: parts[1] || '', date: parts[2] || '' }
-      }) : []
+      
       const worktreeRaw = gitExec(['worktree', 'list', '--porcelain'])
       const worktrees = []
       if (worktreeRaw) {
@@ -300,7 +288,56 @@ app.use('/_git', (req, res, next) => {
       }
       const stashOut = gitExec(['stash', 'list', '--format=%H'])
       const stashCount = stashOut ? stashOut.split('\n').filter(Boolean).length : 0
-      return jsonResponse({ head, headSha, branches, tags, worktrees, stashCount })
+      return jsonResponse({ head, headSha, worktrees, stashCount })
+    } catch (e) { return res.status(500).json({ error: e.message }) }
+  }
+
+  if (decodedUrl === '/branches' || decodedUrl === 'branches') {
+    try {
+      const skip = Math.max(0, parseInt(req.query.skip, 10) || 0)
+      const count = Math.min(100, Math.max(1, parseInt(req.query.count, 10) || 20))
+      
+      const allBranchesRaw = gitExec(['for-each-ref', '--format=%(refname:short)', 'refs/heads/'])
+      const allBranches = allBranchesRaw ? allBranchesRaw.split('\n').filter(Boolean) : []
+      const totalCount = allBranches.length
+      
+      const slice = allBranches.slice(skip, skip + count)
+      const branches = slice.map(name => {
+        const info = gitExec(['for-each-ref', '--format=%(upstream:short)\t%(upstream:track)', `refs/heads/${name}`])
+        const parts = info.split('\t')
+        const track = (parts[1] || '').replace(/^\[|\]$/g, '')
+        const aheadM = track.match(/ahead (\d+)/)
+        const behindM = track.match(/behind (\d+)/)
+        return {
+          name,
+          upstream: parts[0] || '',
+          ahead: aheadM ? parseInt(aheadM[1], 10) : 0,
+          behind: behindM ? parseInt(behindM[1], 10) : 0,
+          gone: track === 'gone'
+        }
+      })
+      
+      return jsonResponse({ branches, totalCount, hasMore: skip + branches.length < totalCount })
+    } catch (e) { return res.status(500).json({ error: e.message }) }
+  }
+
+  if (decodedUrl === '/tags' || decodedUrl === 'tags') {
+    try {
+      const skip = Math.max(0, parseInt(req.query.skip, 10) || 0)
+      const count = Math.min(100, Math.max(1, parseInt(req.query.count, 10) || 20))
+      
+      const allTagsRaw = gitExec(['for-each-ref', '--sort=-creatordate', '--format=%(refname:short)', 'refs/tags/'])
+      const allTags = allTagsRaw ? allTagsRaw.split('\n').filter(Boolean) : []
+      const totalCount = allTags.length
+      
+      const slice = allTags.slice(skip, skip + count)
+      const tags = slice.map(name => {
+        const info = gitExec(['for-each-ref', '--format=%(objectname:short)\t%(creatordate:relative)', `refs/tags/${name}`])
+        const parts = info.split('\t')
+        return { name, sha: parts[0] || '', date: parts[1] || '' }
+      })
+      
+      return jsonResponse({ tags, totalCount, hasMore: skip + tags.length < totalCount })
     } catch (e) { return res.status(500).json({ error: e.message }) }
   }
 
