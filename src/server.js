@@ -52,8 +52,7 @@ const dir = path.resolve(flags.dir)
 const style = {
   link: chalk.blueBright.underline.italic,
   address: chalk.greenBright.underline.italic,
-  port: chalk.reset.cyanBright,
-  pid: chalk.reset.cyanBright
+  port: chalk.reset.cyanBright
 }
 
 const log = (str, err) => {
@@ -353,7 +352,7 @@ app.use('/_git', (req, res, next) => {
   }
 
   if (decodedUrl === '/' || decodedUrl === '') {
-    const data = { title: 'Git Dashboard', content: '<div class="git-dashboard" id="git-dashboard"><p class="git-loading">Loading\u2026</p></div>', pid: process.pid | 'N/A' }
+    const data = { title: 'Git Dashboard', content: '<div class="git-dashboard" id="git-dashboard"><p class="git-loading">Loading\u2026</p></div>' }
     return renderWithLayout('markdown.html', data, dir).then(output => res.send(output)).catch(next)
   }
 
@@ -458,7 +457,6 @@ app.get('*', async (req, res, next) => {
         dirname: path.dirname(decodedUrl),
         content: useReadme ? '<div class="readme-body markdown-body">' + readmeHtml + '</div>' : dirToHtml(filePath, decodedUrl),
         title: path.basename(filePath) || path.basename(dir),
-        pid: process.pid,
         breadcrumbs: createBreadcrumbs(decodedUrl)
       }
       const output = await renderWithLayout(template, data, filePath)
@@ -495,7 +493,7 @@ app.get('*', async (req, res, next) => {
           <div class="toggle-panel" data-panel="preview">${renderedHtml}</div>
           <div class="toggle-panel" data-panel="source" style="display:none">${srcHtml}</div>
         `
-        const data = { title: path.basename(filePath), content: combined, pid: process.pid }
+        const data = { title: path.basename(filePath), content: combined }
         const output = await renderWithLayout('markdown.html', data, path.dirname(filePath))
         res.send(output)
       } else if (isHtml) {
@@ -519,7 +517,7 @@ app.get('*', async (req, res, next) => {
           </div>
           <div class="toggle-panel" data-panel="source" style="display:none">${srcHtml}</div>
         `
-        const data = { title: path.basename(filePath), content: combined, pid: process.pid }
+        const data = { title: path.basename(filePath), content: combined }
         const output = await renderWithLayout('markdown.html', data, path.dirname(filePath))
         res.send(output)
       } else {
@@ -532,7 +530,7 @@ app.get('*', async (req, res, next) => {
           const content = await getFile(filePath)
           const lang = ext ? ext.slice(1) : path.basename(filePath).toLowerCase()
           const html = await markdownToHTML('```' + lang + '\n' + content + '\n```')
-          const data = { title: path.basename(filePath), content: html, pid: process.pid }
+          const data = { title: path.basename(filePath), content: html }
           const output = await renderWithLayout('markdown.html', data, path.dirname(filePath))
           res.send(output)
         } else {
@@ -549,7 +547,7 @@ app.get('*', async (req, res, next) => {
             else if (vidExts.has(ext)) embedHtml = '<div class="bin-viewer video-viewer"><video controls><source src="' + decodedUrl + '"></video></div>'
             else embedHtml = '<div class="bin-viewer audio-viewer"><audio controls><source src="' + decodedUrl + '"></audio></div>'
             const html = await markdownToHTML(embedHtml)
-            const data = { title: path.basename(filePath), content: html, pid: process.pid }
+            const data = { title: path.basename(filePath), content: html }
             const output = await renderWithLayout('markdown.html', data, path.dirname(filePath))
             res.send(output)
           } else {
@@ -564,13 +562,13 @@ app.get('*', async (req, res, next) => {
               const humanSize = sz >= 1048576 ? (sz / 1048576).toFixed(1) + ' MB' : sz >= 1024 ? (sz / 1024).toFixed(1) + ' KB' : sz + ' B'
               const infoMd = `## ${path.basename(filePath)}\n\n| | |\n|---|---|\n| **Path** | \`${decodedUrl}\` |\n| **Size** | ${humanSize} |\n\n> Binary file — cannot be displayed in the browser.`
               const html = await markdownToHTML(infoMd)
-              const data = { title: path.basename(filePath), content: html, pid: process.pid }
+              const data = { title: path.basename(filePath), content: html }
               const output = await renderWithLayout('markdown.html', data, path.dirname(filePath))
               res.send(output)
             } else {
               const content = await getFile(filePath)
               const html = await markdownToHTML('```\n' + content + '\n```')
-              const data = { title: path.basename(filePath), content: html, pid: process.pid }
+              const data = { title: path.basename(filePath), content: html }
               const output = await renderWithLayout('markdown.html', data, path.dirname(filePath))
               res.send(output)
             }
