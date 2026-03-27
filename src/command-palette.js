@@ -60,6 +60,22 @@
       label: 'Theme: Auto',
       icon: SVG_THEME,
       action: function () { setTheme('auto'); closePalette(); }
+    },
+    {
+      label: 'Changes: Toggle File Change Tracker',
+      icon: SVG_FILE,
+      action: function () {
+        if (window.__gitBrowseChangeTracker) window.__gitBrowseChangeTracker.toggle();
+        closePalette();
+      }
+    },
+    {
+      label: 'Changes: Clear All',
+      icon: SVG_FILE,
+      action: function () {
+        if (window.__gitBrowseChangeTracker) window.__gitBrowseChangeTracker.clear();
+        closePalette();
+      }
     }
   ];
 
