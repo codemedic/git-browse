@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  if (window.self !== window.top) return;
+
   var STORAGE_KEY = 'git-browse-theme';
   var themes = ['auto', 'dark', 'light'];
   var themeIcon  = { auto: '🔄', dark: '🌙', light: '☀️' };

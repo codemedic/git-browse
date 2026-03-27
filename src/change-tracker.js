@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  if (window.self !== window.top) return;
+
   var STORAGE_KEY    = 'git-browse-changed-files';
   var MINIMIZED_KEY  = 'git-browse-change-toast-minimized';
   var MOUNT_PREFIX   = '/var/www/';

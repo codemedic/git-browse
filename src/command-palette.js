@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  if (window.self !== window.top) return;
+
   var THEME_KEY = 'git-browse-theme';
 
   // SVG icons — GitHub Octicons, fill="currentColor"

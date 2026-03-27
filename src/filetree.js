@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  if (window.self !== window.top) return;
+
   // Bare mode: suppress all chrome for clean presentation / new-window viewing.
   // Applied synchronously so other scripts (theme-toggle etc.) never show chrome.
   var _bare = window.location.search.indexOf('bare') !== -1;

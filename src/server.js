@@ -206,15 +206,15 @@ const implantOpts = { maxDepth: 10 }
 const implantHandlers = {
   file: (url, opts) => {
     const absUrl = path.join(opts.baseDir, url)
-    return getFile(absUrl).catch(() => '')
+    return getFile(absUrl).catch(() => false)
   },
   markdown: (url, opts) => {
     const absUrl = path.join(opts.baseDir, url)
-    return getFile(absUrl).then(markdownToHTML).catch(() => '')
+    return getFile(absUrl).then(markdownToHTML).catch(() => false)
   },
   html: (url, opts) => {
     const absUrl = path.join(opts.baseDir, url)
-    return getFile(absUrl).catch(() => '')
+    return getFile(absUrl).catch(() => false)
   }
 }
 
@@ -226,7 +226,8 @@ const renderWithLayout = (templateName, data, baseDir) => {
     const replaced = html.replace(/__ASSETS__/g, '/_static/')
     return implant(replaced, implantHandlers, opts).catch(err => {
       // Fallback for any implant parsing error (e.g. curly braces in file content)
-      // or "No implant name-spaces" error.
+      // or "No implant name-spaces" error. Returning the original string
+      // ensures we don't 500 or mangle the output.
       return replaced
     })
   })

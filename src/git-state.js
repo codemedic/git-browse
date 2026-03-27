@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  if (window.self !== window.top) return;
+
   // Only activate on the /_git dashboard page
   if (window.location.pathname !== '/_git') return;
 
