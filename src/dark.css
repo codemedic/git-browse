@@ -370,6 +370,7 @@ html[data-theme="dark"] a.button.back               { background-color: var(--da
 .toolbar-btn:hover { background: rgba(0, 0, 0, 0.07); }
 .toolbar-icon-btn { padding: 3px 5px; }
 .toolbar-btn-icon { display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; }
+.toolbar-btn-icon svg.lucide { width: 100%; height: 100%; }
 .toolbar-btn-active { color: #0969da; }
 
 @media (prefers-color-scheme: dark) {
@@ -479,6 +480,7 @@ body.ft-resizing .ft-resize-handle { background: rgba(9, 105, 218, 0.25); }
 
 .ft-arrow { color: #8c959f; flex-shrink: 0; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
 .ft-icon  { flex-shrink: 0; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
+.ft-arrow svg.lucide, .ft-icon svg.lucide { width: 100%; height: 100%; }
 .ft-icon-folder { color: #d69e2e; }
 .ft-icon-file   { color: #8c959f; }
 .ft-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; min-width: 0; }
@@ -1045,7 +1047,8 @@ html[data-theme="dark"] .code-ln::before { background-color: #161b22; }
 }
 .cmd-palette-item-selected { background: #0969da; color: #ffffff; }
 
-.cmd-palette-item-icon { display: flex; flex-shrink: 0; opacity: 0.75; }
+.cmd-palette-item-icon { display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex-shrink: 0; opacity: 0.75; }
+.cmd-palette-item-icon svg.lucide { width: 100%; height: 100%; }
 .cmd-palette-item-selected .cmd-palette-item-icon { opacity: 1; }
 
 .cmd-palette-item-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1193,9 +1196,14 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
 }
 .change-tree-toggle:hover { background: #f3f4f6; }
 .change-tree-dir-icon {
-  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
   line-height: 1;
 }
+.change-tree-dir-icon svg.lucide { width: 100%; height: 100%; }
 
 .change-tree-file {
   display: flex;
@@ -1222,19 +1230,23 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
   text-decoration: underline;
 }
 .change-tree-dismiss-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
   margin-right: 4px;
-  padding: 0 4px;
+  padding: 0;
   background: none;
   border: none;
   cursor: pointer;
   color: #6e7781;
-  font-size: 14px;
-  line-height: 1;
   border-radius: 3px;
   opacity: 0;
   transition: opacity 0.15s, background 0.15s;
 }
+.change-tree-dismiss-btn svg.lucide { width: 14px; height: 14px; }
 .change-tree-file:hover .change-tree-dismiss-btn {
   opacity: 1;
 }
@@ -1242,7 +1254,15 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
   background: #f3f4f6;
   color: #cf222e;
 }
-.change-tree-file-icon { font-style: normal; }
+.change-tree-file-icon { 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  font-style: normal; 
+}
+.change-tree-file-icon svg.lucide { width: 100%; height: 100%; }
 
 /* --- Change tracker toast dark mode (auto) --- */
 @media (prefers-color-scheme: dark) {

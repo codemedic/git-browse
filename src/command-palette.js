@@ -5,12 +5,8 @@
 
   var THEME_KEY = 'git-browse-theme';
 
-  // SVG icons — GitHub Octicons, fill="currentColor"
-  var SVG_SEARCH   = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/></svg>';
-  var SVG_GIT      = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" d="M11.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25zM4.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5zM3.5 3.25a.75.75 0 1 1 1.5 0 .75.75 0 0 1-1.5 0z"/></svg>';
-  var SVG_THEME    = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-1.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zm5.657-8.157a.75.75 0 0 1 0 1.061l-.97.97a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l.97-.97a.75.75 0 0 1 1.06-.001zM3.343 13.157a.75.75 0 0 1 0 1.06l-.97.97a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l.97-.97a.75.75 0 0 1 1.06 0zm9.9 1.03a.75.75 0 0 1-1.06 0l-.97-.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l.97.97a.75.75 0 0 1 0 1.06zM2.343 3.97a.75.75 0 0 1-1.06 0l-.97-.97a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042.018l.97.97a.75.75 0 0 1 0 1.024zM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13zM2.343 12.03a.75.75 0 0 1 0 1.06l-.97.97a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l.97-.97a.75.75 0 0 1 1.06-.001zM13.657 3.97a.75.75 0 0 1 0-1.06l.97-.97a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-.97.97a.75.75 0 0 1-1.06 0zM16 8a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 16 8zM3 8a.75.75 0 0 1-.75.75H.75a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 3 8z"/></svg>';
-  var SVG_FOLDER   = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25v-8.5A1.75 1.75 0 0 0 14.25 3H7.5a.25.25 0 0 1-.2-.1l-.9-1.2C6.07 1.26 5.55 1 5 1H1.75z"/></svg>';
-  var SVG_FILE     = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25V1.75zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 10 4.25V1.5H3.75zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011z"/></svg>';
+  var ICON_FOLDER = 'folder';
+  var ICON_FILE   = 'file';
 
   // ---------------------------------------------------------------------------
   // State
@@ -35,9 +31,17 @@
     // Keep theme-toggle button in sync
     var btn = document.getElementById('theme-toggle');
     if (btn) {
-      var icons  = { auto: '🔄', dark: '🌙', light: '☀️' };
+      var icons  = { auto: 'monitor', dark: 'moon', light: 'sun' };
       var labels = { auto: 'auto', dark: 'dark', light: 'light' };
-      btn.textContent = icons[theme] + ' ' + labels[theme];
+      var iconSpan = btn.querySelector('.toolbar-btn-icon');
+      var labelSpan = btn.querySelector('span:not(.toolbar-btn-icon)');
+      if (iconSpan) {
+        iconSpan.innerHTML = '<i data-lucide="' + icons[theme] + '"></i>';
+        if (window.__gitBrowseIcons) window.__gitBrowseIcons.create(iconSpan);
+      }
+      if (labelSpan) {
+        labelSpan.textContent = labels[theme];
+      }
     }
   }
 
@@ -45,27 +49,27 @@
     {
       label: 'Git: Open Dashboard',
       detail: '/_git',
-      icon: SVG_GIT,
+      icon: 'git-branch',
       action: function () { window.location.href = '/_git'; }
     },
     {
       label: 'Theme: Dark',
-      icon: SVG_THEME,
+      icon: 'moon',
       action: function () { setTheme('dark'); closePalette(); }
     },
     {
       label: 'Theme: Light',
-      icon: SVG_THEME,
+      icon: 'sun',
       action: function () { setTheme('light'); closePalette(); }
     },
     {
       label: 'Theme: Auto',
-      icon: SVG_THEME,
+      icon: 'monitor',
       action: function () { setTheme('auto'); closePalette(); }
     },
     {
       label: 'Changes: Toggle File Change Tracker',
-      icon: SVG_FILE,
+      icon: 'list-plus',
       action: function () {
         if (window.__gitBrowseChangeTracker) window.__gitBrowseChangeTracker.toggle();
         closePalette();
@@ -73,7 +77,7 @@
     },
     {
       label: 'Changes: Clear All',
-      icon: SVG_FILE,
+      icon: 'list-x',
       action: function () {
         if (window.__gitBrowseChangeTracker) window.__gitBrowseChangeTracker.clear();
         closePalette();
@@ -114,7 +118,7 @@
       results.push({
         label:  f.name,
         detail: f.path,
-        icon:   f.isDir ? SVG_FOLDER : SVG_FILE,
+        icon:   f.isDir ? ICON_FOLDER : ICON_FILE,
         keepOpen: f.isDir,
         action: f.isDir
           ? (function (folderPath) {
@@ -150,7 +154,7 @@
 
     var searchIcon = document.createElement('span');
     searchIcon.className = 'cmd-palette-search-icon';
-    searchIcon.innerHTML = SVG_SEARCH;
+    searchIcon.innerHTML = '<i data-lucide="search"></i>';
 
     var input = document.createElement('input');
     input.id = 'cmd-palette-input';
@@ -177,6 +181,8 @@
     modal.appendChild(list);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
+
+    if (window.__gitBrowseIcons) window.__gitBrowseIcons.create(modal);
 
     return { overlay: overlay, input: input, list: list };
   }
@@ -207,7 +213,12 @@
 
       var iconEl = document.createElement('span');
       iconEl.className = 'cmd-palette-item-icon';
-      iconEl.innerHTML = cmd.icon;
+      var iconName = cmd.icon || 'file';
+      if (iconName === 'file' && !cmd.keepOpen && window.__gitBrowseIcons) {
+        iconName = window.__gitBrowseIcons.getFileIcon(cmd.label);
+      }
+      
+      iconEl.innerHTML = '<i data-lucide="' + iconName + '"></i>';
 
       var labelEl = document.createElement('span');
       labelEl.className = 'cmd-palette-item-label';
@@ -230,6 +241,8 @@
 
       list.appendChild(li);
     });
+    
+    if (window.__gitBrowseIcons) window.__gitBrowseIcons.create(list);
   }
 
   function selectItem(idx) {

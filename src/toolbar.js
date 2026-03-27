@@ -7,14 +7,7 @@
   var themes = ['auto', 'dark', 'light'];
   var themeLabel = { auto: 'auto', dark: 'dark', light: 'light' };
 
-  // SVG icons — GitHub Octicons, fill="currentColor"
-  var SVG_THEME_AUTO   = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0 2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 13H9v1.25h2.25a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1 0-1.5H7V13H1.75A1.75 1.75 0 0 1 0 11.25v-8.5zm1.75-.25a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25v-8.5a.25.25 0 0 0-.25-.25H1.75z"/></svg>';
-  var SVG_THEME_DARK   = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M9.598 1.591a.75.75 0 0 1 .785-.175 7 7 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.046-7.046.75.75 0 0 1 .175-.786zm1.616 1.945a7 7 0 0 1-7.678 7.678 5.5 5.5 0 1 0 7.678-7.678z"/></svg>';
-  var SVG_THEME_LIGHT  = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 10.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM8 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13zM2.343 2.343a.75.75 0 0 1 1.061 0l1.06 1.061a.75.75 0 0 1-1.06 1.06l-1.061-1.06a.75.75 0 0 1 0-1.061zm10.607 10.607a.75.75 0 0 1 0 1.06l-1.06 1.061a.75.75 0 1 1-1.061-1.06l1.06-1.061a.75.75 0 0 1 1.061 0zM1.25 8a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H2a.75.75 0 0 1-.75-.75zm11.25 0a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H13a.75.75 0 0 1-.75-.75zM3.404 12.596a.75.75 0 0 1 0 1.061l-1.061 1.06a.75.75 0 0 1-1.06-1.06l1.06-1.061a.75.75 0 0 1 1.061 0zm11.535-9.192a.75.75 0 0 1 0 1.06l-1.06 1.061a.75.75 0 1 1-1.061-1.06l1.06-1.061a.75.75 0 0 1 1.061 0z"/></svg>';
-  var themeIcon = { auto: SVG_THEME_AUTO, dark: SVG_THEME_DARK, light: SVG_THEME_LIGHT };
-
-  var SVG_GIT_BRANCH = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M11.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25zM4.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5zM3.5 3.25a.75.75 0 1 1 1.5 0 .75.75 0 0 1-1.5 0z"/></svg>';
-  var SVG_SEARCH     = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/></svg>';
+  var themeIcon = { auto: 'monitor', dark: 'moon', light: 'sun' };
 
   function applyTheme(theme) {
     if (theme === 'auto') {
@@ -47,7 +40,7 @@
     
     var themeIconSpan = document.createElement('span');
     themeIconSpan.className = 'toolbar-btn-icon';
-    themeIconSpan.innerHTML = themeIcon[current];
+    themeIconSpan.innerHTML = '<i data-lucide="' + themeIcon[current] + '"></i>';
     
     var themeLabelSpan = document.createElement('span');
     themeLabelSpan.textContent = themeLabel[current];
@@ -60,8 +53,9 @@
       current = themes[(idx + 1) % themes.length];
       localStorage.setItem(STORAGE_KEY, current);
       applyTheme(current);
-      themeIconSpan.innerHTML = themeIcon[current];
+      themeIconSpan.innerHTML = '<i data-lucide="' + themeIcon[current] + '"></i>';
       themeLabelSpan.textContent = themeLabel[current];
+      if (window.__gitBrowseIcons) window.__gitBrowseIcons.create(themeIconSpan);
     });
 
     // -------------------------------------------------------------------------
@@ -72,7 +66,7 @@
     gitBtn.className = 'toolbar-btn toolbar-icon-btn';
     gitBtn.href = '/_git';
     gitBtn.title = 'Git dashboard';
-    gitBtn.innerHTML = SVG_GIT_BRANCH;
+    gitBtn.innerHTML = '<span class="toolbar-btn-icon"><i data-lucide="git-branch"></i></span>';
     if (window.location.pathname === '/_git') gitBtn.classList.add('toolbar-btn-active');
 
     // -------------------------------------------------------------------------
@@ -84,7 +78,7 @@
     // Show OS-appropriate shortcut hint in the tooltip
     var isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
     cmdBtn.title = 'Command Palette (' + (isMac ? '\u2318' : 'Ctrl') + '+Shift+P)';
-    cmdBtn.innerHTML = SVG_SEARCH;
+    cmdBtn.innerHTML = '<span class="toolbar-btn-icon"><i data-lucide="search"></i></span>';
 
     cmdBtn.addEventListener('click', function () {
       // Dispatch a synthetic Ctrl+Shift+P so command-palette.js handles it
@@ -102,5 +96,8 @@
     toolbar.appendChild(gitBtn);
     toolbar.appendChild(cmdBtn);
     document.body.appendChild(toolbar);
+
+    // Initialize icons for the entire toolbar
+    if (window.__gitBrowseIcons) window.__gitBrowseIcons.create(toolbar);
   });
 })();

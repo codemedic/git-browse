@@ -193,6 +193,8 @@ app.get('/_static/*', (req, res) => {
   let filePath
   if (file === 'style.css') {
     filePath = path.join(__dirname, 'dark.css')
+  } else if (file === 'lucide.min.js') {
+    filePath = path.resolve(__dirname, '../node_modules/lucide/dist/umd/lucide.min.js')
   } else {
     filePath = path.join(__dirname, file)
   }
