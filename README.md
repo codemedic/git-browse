@@ -2,7 +2,7 @@
 
 A Docker-based local web UI for browsing a git repository in the browser.
 
-Powered by [markserv](https://github.com/markserv/markserv).
+*Kudos to [markserv](https://github.com/markserv/markserv) for the original inspiration and base templates.*
 
 ## Features
 

@@ -482,7 +482,7 @@ html[data-theme="dark"] #filetree-open-btn    { background: rgba(22, 27, 34, 0.8
 }
 #offline-toast-dismiss:hover { opacity: 1; }
 
-/* --- Fluid layout: override markserv's fixed 978px body --- */
+/* --- Fluid layout: override default fixed 978px body --- */
 /* Body fills the viewport; text content is capped for readability;
    media viewers are free to expand to full available width. */
 body {

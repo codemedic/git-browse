@@ -106,7 +106,7 @@ main() {
     # If this repo's container is already running, show its URL and tail logs
     if "${compose[@]}" ps --status running --quiet 2>/dev/null | grep -q .; then
         local port
-        port=$("${compose[@]}" port markserv 8080 2>/dev/null | cut -d: -f2)
+        port=$("${compose[@]}" port git-browse 8080 2>/dev/null | cut -d: -f2)
         echo "Already running: $server_root"
         echo "Open:            $url"
         echo "(Ctrl+C to stop)"

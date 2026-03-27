@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="__ASSETS__style.css">
+  <script src="__ASSETS__theme-toggle.js"></script>
+  <script src="__ASSETS__filetree.js"></script>
+  <script src="__ASSETS__offline-check.js"></script>
+  <script src="__ASSETS__git-state.js"></script>
+  <script src="__ASSETS__picture-theme.js"></script>
+  <script src="__ASSETS__command-palette.js"></script>
+  <script src="__ASSETS__change-tracker.js"></script>
+</head>
+<body class="directory-view">
+  <div class="breadcrumbs">
+    {{#each breadcrumbs}}
+    <a href="{{href}}">{{text}}</a>
+    {{/each}}
+  </div>
+  <div id="content">
+    {{{content}}}
+  </div>
+  <div class="footer">
+    <span class="pid">PID: {{pid}}</span>
+  </div>
+</body>
+</html>

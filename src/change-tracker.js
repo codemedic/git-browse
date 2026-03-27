@@ -16,7 +16,7 @@
   // currently displayed in the browser.
   // Directory views (pathname ends with '/') always allow reload — the listing
   // may have changed.  Special routes (/_git, /_files) never reload on file changes.
-  // Matches markserv's dir.js readme lookup: readme[.md|.markdown|.txt]
+  // Matches server's readme lookup: readme[.md|.markdown|.txt]
   var README_RE = /^readme(\.md|\.markdown|\.txt)?$/i;
 
   function isCurrentFile(rawPath) {
