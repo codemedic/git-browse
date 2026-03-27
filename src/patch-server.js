@@ -144,6 +144,31 @@ const NEW_HLJS = `const mdItHLJS = require('markdown-it-highlightjs')
 require('highlight.js').registerLanguage('mermaid', function() { return { contains: [] } })`
 
 // ---------------------------------------------------------------------------
+// Patch 8: livereload — watch all files, filter via .gitignore + .git/info/exclude
+// ---------------------------------------------------------------------------
+
+const OLD_LIVERELOAD = `const startLiveReloadServer = (liveReloadPort, flags) => {
+\tlet {dir} = flags
+\tconst isDir = fs.statSync(dir).isDirectory()
+\tif (!isDir) {
+\t\tdir = path.parse(flags.dir).dir
+\t}
+
+\tconst exts = fileTypes.watch.map(type => type.slice(1))
+\tconst exclusions = fileTypes.exclusions.map(exPath => {
+\t\treturn path.join(dir, exPath)
+\t})
+
+\treturn liveReload.createServer({
+\t\texts,
+\t\texclusions,
+\t\tport: liveReloadPort
+\t}).watch(path.resolve(dir))
+}`
+
+const NEW_LIVERELOAD = fs.readFileSync('/tmp/patches/livereload.js', 'utf8').trimEnd()
+
+// ---------------------------------------------------------------------------
 
 let content = fs.readFileSync(SERVER_PATH, 'utf8')
 
@@ -191,5 +216,11 @@ if (!content.includes(OLD_FILES)) {
 }
 content = content.replace(OLD_FILES, NEW_FILES)
 
+if (!content.includes(OLD_LIVERELOAD)) {
+  console.error('Patch 8 (livereload gitignore filter) target block not found — server.js may have changed')
+  process.exit(1)
+}
+content = content.replace(OLD_LIVERELOAD, NEW_LIVERELOAD)
+
 fs.writeFileSync(SERVER_PATH, content, 'utf8')
-console.log('server.js patched successfully (7 patches applied)')
+console.log('server.js patched successfully (8 patches applied)')

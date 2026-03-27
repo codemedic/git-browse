@@ -3,7 +3,7 @@ FROM node:lts-alpine
 RUN apk add --no-cache git
 # Allow git to read repos mounted from the host (different UID → dubious ownership)
 RUN git config --global --add safe.directory /var/www
-RUN npm install -g markserv
+RUN npm install -g markserv ignore
 
 COPY src/dark.css /tmp/dark.css
 RUN cat /tmp/dark.css >> /usr/local/lib/node_modules/markserv/lib/templates/markserv.css

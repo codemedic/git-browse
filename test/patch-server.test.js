@@ -27,12 +27,14 @@ function evalOldConst (src, name) {
 }
 
 function applyPatches (snapshot, patchSrc) {
-	const OLD_FILE     = evalOldConst(patchSrc, 'OLD_FILE')
-	const OLD_DIR      = evalOldConst(patchSrc, 'OLD_DIR')
-	const OLD_HTML     = evalOldConst(patchSrc, 'OLD_HTML')
-	const OLD_MARKDOWN = evalOldConst(patchSrc, 'OLD_MARKDOWN')
-	const OLD_GIT      = evalOldConst(patchSrc, 'OLD_GIT')
-	const OLD_HLJS     = evalOldConst(patchSrc, 'OLD_HLJS')
+	const OLD_FILE       = evalOldConst(patchSrc, 'OLD_FILE')
+	const OLD_DIR        = evalOldConst(patchSrc, 'OLD_DIR')
+	const OLD_HTML       = evalOldConst(patchSrc, 'OLD_HTML')
+	const OLD_MARKDOWN   = evalOldConst(patchSrc, 'OLD_MARKDOWN')
+	const OLD_GIT        = evalOldConst(patchSrc, 'OLD_GIT')
+	const OLD_HLJS       = evalOldConst(patchSrc, 'OLD_HLJS')
+	const OLD_LIVERELOAD = evalOldConst(patchSrc, 'OLD_LIVERELOAD')
+	const NEW_LIVERELOAD = fs.readFileSync(path.join(PATCHES_DIR, 'livereload.js'), 'utf8').trimEnd()
 
 	const NEW_FILE     = fs.readFileSync(path.join(PATCHES_DIR, 'other.js'),    'utf8').trimEnd()
 	const NEW_DIR      = fs.readFileSync(path.join(PATCHES_DIR, 'dir.js'),      'utf8').trimEnd()
@@ -49,6 +51,7 @@ function applyPatches (snapshot, patchSrc) {
 	content = content.replace(OLD_MARKDOWN, NEW_MARKDOWN)
 	content = content.replace(OLD_GIT, NEW_GIT)
 	content = content.replace(OLD_HLJS, NEW_HLJS)
+	content = content.replace(OLD_LIVERELOAD, NEW_LIVERELOAD)
 	return content
 }
 
@@ -75,7 +78,7 @@ test('each OLD_* string is present in the server-original.js snapshot', () => {
 	const snapshot  = fs.readFileSync(FIXTURE, 'utf8')
 	const patchSrc  = fs.readFileSync(path.join(ROOT, 'src', 'patch-server.js'), 'utf8')
 
-	for (const name of ['OLD_FILE', 'OLD_DIR', 'OLD_HTML', 'OLD_MARKDOWN', 'OLD_GIT', 'OLD_HLJS']) {
+	for (const name of ['OLD_FILE', 'OLD_DIR', 'OLD_HTML', 'OLD_MARKDOWN', 'OLD_GIT', 'OLD_HLJS', 'OLD_LIVERELOAD']) {
 		const old = evalOldConst(patchSrc, name)
 		assert.ok(
 			snapshot.includes(old),
@@ -111,6 +114,21 @@ test('patched server.js registers mermaid as a no-op hljs language', () => {
 		patched.includes("registerLanguage('mermaid'"),
 		'patched server.js must register mermaid as an hljs language'
 	)
+})
+
+// ---------------------------------------------------------------------------
+// Test 8: Patch 8 — livereload uses gitignore filter instead of ext list
+// ---------------------------------------------------------------------------
+
+test('patched server.js uses gitignore-based livereload filter', () => {
+	const snapshot  = fs.readFileSync(FIXTURE, 'utf8')
+	const patchSrc  = fs.readFileSync(path.join(ROOT, 'src', 'patch-server.js'), 'utf8')
+	const patched   = applyPatches(snapshot, patchSrc)
+
+	assert.ok(patched.includes("require('ignore')"),    'patched server.js must require ignore package')
+	assert.ok(patched.includes('.gitignore'),            'patched server.js must read .gitignore')
+	assert.ok(patched.includes('.git/info/exclude'),     'patched server.js must read .git/info/exclude')
+	assert.ok(!patched.includes('fileTypes.watch.map'), 'patched server.js must not use fileTypes.watch ext filter')
 })
 
 // ---------------------------------------------------------------------------
