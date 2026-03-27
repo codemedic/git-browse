@@ -11,14 +11,16 @@ const startLiveReloadServer = (liveReloadPort, flags) => {
 		if (fs.existsSync(full)) ig.add(fs.readFileSync(full, 'utf8'))
 	}
 
-	return liveReload.createServer({
-		port: liveReloadPort,
-		// Pass directories through so chokidar descends into them;
-		// filter files against combined gitignore rules.
-		ignored: (filePath, stats) => {
-			if (stats && !stats.isFile()) return false
-			const rel = path.relative(dir, filePath)
-			return rel.startsWith('..') ? false : ig.ignores(rel)
-		}
-	}).watch(path.resolve(dir))
+	// The bundled livereload version only supports `exts` + `exclusions` — it ignores
+	// a custom `ignored` function. Instead, override filterRefresh (called by chokidar
+	// on every change event) to apply gitignore rules rather than an extension list.
+	// Must be set before .watch() since watch() binds filterRefresh immediately.
+	const server = liveReload.createServer({ port: liveReloadPort })
+	server.filterRefresh = function (filepath) {
+		const rel = path.relative(dir, filepath)
+		if (!rel || rel.startsWith('..')) return
+		if (!ig.ignores(rel)) server.refresh(filepath)
+	}
+	server.watch(path.resolve(dir))
+	return server
 }
