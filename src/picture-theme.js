@@ -15,26 +15,50 @@
 
     for (var i = 0; i < pictures.length; i++) {
       var sources = pictures[i].querySelectorAll('source[media]');
+      var img = pictures[i].querySelector('img');
+      var activeSrcset = null;
+
       for (var j = 0; j < sources.length; j++) {
         var src = sources[j];
 
-        // Stash the original media value on first encounter so auto-mode can restore it.
+        // Stash originals on first encounter so auto-mode can restore them.
         if (!src.hasAttribute('data-original-media')) {
           src.setAttribute('data-original-media', src.getAttribute('media'));
         }
-        var original = src.getAttribute('data-original-media');
+        if (!src.hasAttribute('data-original-srcset')) {
+          src.setAttribute('data-original-srcset', src.getAttribute('srcset') || '');
+        }
+
+        var originalMedia   = src.getAttribute('data-original-media');
+        var originalSrcset  = src.getAttribute('data-original-srcset');
 
         if (!theme) {
-          // Auto mode — restore the original media query and let the browser decide.
-          src.setAttribute('media', original);
+          // Auto — restore originals and let the browser decide.
+          src.setAttribute('media',  originalMedia);
+          src.setAttribute('srcset', originalSrcset);
         } else {
-          var isDark  = DARK_MQ.test(original);
-          var isLight = LIGHT_MQ.test(original);
+          var isDark  = DARK_MQ.test(originalMedia);
+          var isLight = LIGHT_MQ.test(originalMedia);
           if (isDark || isLight) {
             var show = (theme === 'dark' && isDark) || (theme === 'light' && isLight);
-            // "all" forces the source active; "not all" forces it inactive.
+            
+            // Force the media query to be active or inactive
             src.setAttribute('media', show ? 'all' : 'not all');
+            src.setAttribute('srcset', originalSrcset);
+            
+            if (show) activeSrcset = originalSrcset;
           }
+        }
+      }
+
+      // Belt-and-suspenders: also update <img> src directly
+      if (img) {
+        if (!img.hasAttribute('data-original-src')) {
+          img.setAttribute('data-original-src', img.getAttribute('src') || '');
+        }
+        var targetSrc = activeSrcset || (!theme ? img.getAttribute('data-original-src') : null);
+        if (targetSrc && img.getAttribute('src') !== targetSrc) {
+          img.setAttribute('src', targetSrc);
         }
       }
     }
