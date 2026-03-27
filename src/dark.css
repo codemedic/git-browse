@@ -638,7 +638,9 @@ article.markdown-body:not(:has(.bin-viewer)),
 
 /* --- Bare mode: clean presentation without file-browser chrome --- */
 /* data-bare is set on <html> synchronously by filetree.js on ?bare URLs */
-[data-bare] #theme-toggle,
+[data-bare] #toolbar,
+[data-bare] #change-toast,
+[data-bare] #filetree-open-btn,
 [data-bare] .source-toggle-bar { display: none !important; }
 /* Body has no ft-open margin in bare mode (sidebar is never created) */
 
