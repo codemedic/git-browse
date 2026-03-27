@@ -34,7 +34,6 @@ html[data-theme="dark"] .mermaid-error-src { background: #161b22; border-color: 
   line-height: 1.5;
   word-wrap: break-word;
   color: #1f2328;
-  background-color: #ffffff;
 }
 
 .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {
@@ -117,7 +116,13 @@ html[data-theme="dark"] .mermaid-error-src { background: #161b22; border-color: 
 
 .markdown-body table tr:nth-child(2n) { background-color: #f6f8fa; }
 
-.markdown-body img { max-width: 100%; box-sizing: content-box; background-color: #ffffff; }
+.markdown-body img { max-width: 100%; box-sizing: content-box; }
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .markdown-body img { background-color: transparent; }
+}
+
+html[data-theme="dark"] .markdown-body img { background-color: transparent; }
 .markdown-body hr { height: 0.25em; padding: 0; margin: 24px 0; background-color: #d0d7de; border: 0; }
 
 /* --- Syntax highlighting: GitHub Light theme --- */
@@ -626,6 +631,7 @@ body {
   width: auto;
   max-width: 100%;
   margin: 16px 32px;
+  background-color: #ffffff;
 }
 /* Constrain text content (markdown, code) but not media viewer pages */
 article.markdown-body:not(:has(.bin-viewer)),
