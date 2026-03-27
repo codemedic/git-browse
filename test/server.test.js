@@ -56,10 +56,9 @@ describe('Server Integration Tests', () => {
     assert.ok(res.text.includes('FROM'))
   })
 
-  test('GET /docs/markserv-migration.md returns 200 (handles nested curly braces)', async () => {
-    const res = await request(app).get('/docs/markserv-migration.md')
+  test('GET /package.json returns 200 (handles files with curly braces)', async () => {
+    const res = await request(app).get('/package.json')
     assert.strictEqual(res.statusCode, 200)
-    assert.ok(res.text.includes('markdown-view'))
-    assert.ok(res.text.includes('markserv'))
+    assert.ok(res.text.includes('git-browse'))
   })
 })

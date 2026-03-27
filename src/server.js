@@ -177,6 +177,24 @@ const dirToHtml = (absPath, relPath) => {
 }
 
 // ---------------------------------------------------------------------------
+// Git helpers (synchronous — fine for single-user; would need async spawn for shared use)
+// ---------------------------------------------------------------------------
+
+const gitExec = (args) => {
+  const r = spawnSync('git', args, { cwd: dir, timeout: 5000, encoding: 'utf8' })
+  if (r.error || r.status !== 0) return ''
+  return (r.stdout || '').trim()
+}
+
+const getGitFiles = () => {
+  const tracked = gitExec(['ls-files']).split('\n').filter(Boolean)
+  const untracked = gitExec(['ls-files', '--others', '--exclude-standard']).split('\n').filter(Boolean)
+  const seen = new Set(tracked)
+  untracked.forEach(f => seen.add(f))
+  return Array.from(seen).sort()
+}
+
+// ---------------------------------------------------------------------------
 // Express App
 // ---------------------------------------------------------------------------
 
@@ -259,13 +277,6 @@ const sendError = (req, res, code, filePath, err, decodedUrl) => {
 // Git Routes (/_git/*)
 app.use('/_git', (req, res, next) => {
   const decodedUrl = decodeURIComponent(req.path)
-  const gitExec = (args) => {
-    const r = spawnSync('git', args, { cwd: dir, timeout: 5000, encoding: 'utf8' })
-    if (r.error || r.status !== 0) return ''
-    return (r.stdout || '').trim()
-  }
-
-  const jsonResponse = (obj) => res.json(obj)
 
   if (decodedUrl === '/state' || decodedUrl === 'state') {
     try {
@@ -288,7 +299,7 @@ app.use('/_git', (req, res, next) => {
       }
       const stashOut = gitExec(['stash', 'list', '--format=%H'])
       const stashCount = stashOut ? stashOut.split('\n').filter(Boolean).length : 0
-      return jsonResponse({ head, headSha, worktrees, stashCount })
+      return res.json({ head, headSha, worktrees, stashCount })
     } catch (e) { return res.status(500).json({ error: e.message }) }
   }
 
@@ -317,7 +328,7 @@ app.use('/_git', (req, res, next) => {
         }
       })
       
-      return jsonResponse({ branches, totalCount, hasMore: skip + branches.length < totalCount })
+      return res.json({ branches, totalCount, hasMore: skip + branches.length < totalCount })
     } catch (e) { return res.status(500).json({ error: e.message }) }
   }
 
@@ -337,7 +348,7 @@ app.use('/_git', (req, res, next) => {
         return { name, sha: parts[0] || '', date: parts[1] || '' }
       })
       
-      return jsonResponse({ tags, totalCount, hasMore: skip + tags.length < totalCount })
+      return res.json({ tags, totalCount, hasMore: skip + tags.length < totalCount })
     } catch (e) { return res.status(500).json({ error: e.message }) }
   }
 
@@ -355,6 +366,14 @@ app.use('/_git', (req, res, next) => {
         const refs = parts[5] ? parts[5].split(', ').filter(Boolean) : []
         return { sha: fullSha.slice(0, 8), fullSha, parents: fullParents.map(p => p.slice(0, 8)), _fullParents: fullParents, message: parts[2] || '', author: parts[3] || '', date: parts[4] || '', refs, lane: 0 }
       }) : []
+      // Lane assignment for the branch graph visualisation.
+      // Each lane is a vertical column in the graph. The `lanes` array tracks
+      // which commit SHA each lane is "expecting" next (i.e. the parent it
+      // follows). The algorithm walks commits in topo-order and for each one:
+      //   1. Claims the lane that was expecting this SHA, or grabs a free slot.
+      //   2. Forwards the lane to the first parent (continuation of the line).
+      //   3. Allocates new lanes for any additional parents (merge edges).
+      //   4. Frees any other lanes that were also expecting this SHA (converging branches).
       const lanes = []
       commits.forEach(commit => {
         const { fullSha, _fullParents: parents } = commit
@@ -369,7 +388,7 @@ app.use('/_git', (req, res, next) => {
         for (let k = 0; k < lanes.length; k++) { if (k !== laneIdx && lanes[k] === fullSha) lanes[k] = null }
       })
       commits.forEach(c => { delete c.fullSha; delete c._fullParents })
-      return jsonResponse({ commits, totalCount, hasMore: skip + commits.length < totalCount })
+      return res.json({ commits, totalCount, hasMore: skip + commits.length < totalCount })
     } catch (e) { return res.status(500).json({ error: e.message }) }
   }
 
@@ -386,7 +405,7 @@ app.use('/_git', (req, res, next) => {
         if (filePath && !seen.has(filePath)) { seen.add(filePath); acc.push({ status: parts[0] || '?', path: filePath }) }
         return acc
       }, []) : []
-      return jsonResponse({ sha, message, files })
+      return res.json({ sha, message, files })
     } catch (e) { return res.status(500).json({ error: e.message }) }
   }
 
@@ -401,18 +420,6 @@ app.use('/_git', (req, res, next) => {
 // File Search Routes (/_files/*)
 app.use('/_files', (req, res, next) => {
   const decodedUrl = decodeURIComponent(req.path)
-  const getGitFiles = () => {
-    const gitExec = (args) => {
-      const r = spawnSync('git', args, { cwd: dir, timeout: 5000, encoding: 'utf8' })
-      if (r.error || r.status !== 0) return ''
-      return r.stdout || ''
-    }
-    const tracked = gitExec(['ls-files']).split('\n').filter(Boolean)
-    const untracked = gitExec(['ls-files', '--others', '--exclude-standard']).split('\n').filter(Boolean)
-    const seen = new Set(tracked)
-    untracked.forEach(f => seen.add(f))
-    return Array.from(seen).sort()
-  }
 
   if (decodedUrl === '/listing') {
     try {
