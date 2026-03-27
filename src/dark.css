@@ -1287,6 +1287,14 @@ html[data-theme="dark"] .change-tree-dismiss-btn:hover { background: #21262d; co
   text-align: center;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .footer {
+    border-top-color: var(--dark-border);
+    color: var(--dark-muted);
+  }
+}
+
 html[data-theme="dark"] .footer {
   border-top-color: var(--dark-border);
   color: var(--dark-muted);
