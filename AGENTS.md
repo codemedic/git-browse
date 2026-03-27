@@ -22,6 +22,15 @@ markdown and directory browser with deep Git integration.
   dashboard.
 - **Styles (`src/dark.css`):** The primary stylesheet.
 
+## 🗣️ Userbase & Communication Standards
+
+### Target Userbase
+The target users are **experienced developers** who use modern IDEs (like VS Code) and AI coding agents daily. They expect a high baseline of functionality (e.g., syntax highlighting, markdown rendering, responsive UI) as a given.
+
+### Communication Guidelines
+- **No Feature Boasting:** Do not list or highlight standard developer-tool features in progress reports or final summaries unless they are truly unique or technically unexpected for this audience.
+- **Reasoning:** This userbase values **high-signal, low-noise** communication. Listing baseline features (e.g., "now supports line numbers") is perceived as "boasty" or redundant, as these users consider such functionality a standard requirement for any serious coding tool.
+
 ## 🛠️ Development Workflow
 
 ### Server-side changes
