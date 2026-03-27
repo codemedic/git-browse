@@ -97,9 +97,18 @@
         label:  f.name,
         detail: f.path,
         icon:   f.isDir ? SVG_FOLDER : SVG_FILE,
-        action: (function (href) {
-          return function () { window.location.href = href; };
-        }(f.path))
+        keepOpen: f.isDir,
+        action: f.isDir
+          ? (function (folderPath) {
+              return function () {
+                var prefix = folderPath.replace(/^\//, '') + '/';
+                _palette.input.value = prefix;
+                refreshResults(prefix);
+              };
+            }(f.path))
+          : (function (href) {
+              return function () { window.location.href = href; };
+            }(f.path))
       });
     }
     return results;
@@ -128,7 +137,7 @@
     var input = document.createElement('input');
     input.id = 'cmd-palette-input';
     input.type = 'text';
-    input.placeholder = 'Type a command or file name\u2026';
+    input.placeholder = '\u003e command \u2014 or type a file name\u2026';
     input.setAttribute('autocomplete', 'off');
     input.setAttribute('spellcheck', 'false');
     input.setAttribute('aria-autocomplete', 'list');
@@ -222,8 +231,9 @@
 
   function runCommand(idx) {
     if (idx >= 0 && _commands[idx]) {
-      closePalette();
-      _commands[idx].action();
+      var cmd = _commands[idx];
+      if (!cmd.keepOpen) closePalette();
+      cmd.action();
     }
   }
 
@@ -232,12 +242,18 @@
   // ---------------------------------------------------------------------------
 
   function refreshResults(query) {
-    var builtins = builtinsMatching(query);
-    fetchFiles(query, function (files) {
-      // Guard: ignore stale callbacks if palette was closed or query changed
-      if (!_palette || !_palette.overlay.classList.contains('cmd-palette-visible')) return;
-      renderResults(buildResults(builtins, files));
-    });
+    var isCommandMode = query.charAt(0) === '>';
+    if (isCommandMode) {
+      // Strip the '>' prefix and any leading space for matching
+      var cmdQuery = query.slice(1).replace(/^\s*/, '');
+      renderResults(buildResults(builtinsMatching(cmdQuery), []));
+    } else {
+      fetchFiles(query, function (files) {
+        // Guard: ignore stale callbacks if palette was closed or query changed
+        if (!_palette || !_palette.overlay.classList.contains('cmd-palette-visible')) return;
+        renderResults(buildResults([], files));
+      });
+    }
   }
 
   function scheduleRefresh(query) {
@@ -279,10 +295,12 @@
       });
     }
 
-    _palette.input.value = '';
+    _palette.input.value = '> ';
     _palette.overlay.classList.add('cmd-palette-visible');
     _palette.input.focus();
-    refreshResults('');
+    // Position cursor at end of pre-filled '> '
+    _palette.input.setSelectionRange(2, 2);
+    refreshResults('> ');
   }
 
   function closePalette() {
