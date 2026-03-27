@@ -26,7 +26,7 @@ describe('Server Integration Tests', () => {
   test('GET /non-existent returns 404', async () => {
     const res = await request(app).get('/non-existent')
     assert.strictEqual(res.statusCode, 404)
-    assert.ok(res.text.includes('Error 404'))
+    assert.ok(res.text.includes('File Not Found'))
   })
 
   test('GET /_static/style.css returns 200', async () => {

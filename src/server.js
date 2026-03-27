@@ -125,6 +125,10 @@ const baseTemplate = (templateUrl, handlebarData) => {
   })
 }
 
+handlebars.registerHelper('eq', function (a, b) {
+  return a === b
+})
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

@@ -349,6 +349,18 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     var files = loadChanges();
+
+    // If we're on an error page (e.g. 404 because file was deleted),
+    // remove the current file from the changed list.
+    if (document.body.classList.contains('error-view')) {
+      var pathname = window.location.pathname;
+      var rel = normalizePath(pathname);
+      if (files[rel]) {
+        delete files[rel];
+        saveChanges(files);
+      }
+    }
+
     if (fileCount(files) > 0) renderToast(files);
   });
 

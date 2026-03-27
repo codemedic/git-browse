@@ -3,15 +3,98 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Error {{code}}</title>
+  <title>{{#if (eq code 404)}}File Not Found{{else}}Error {{code}}{{/if}}</title>
   <link rel="stylesheet" href="__ASSETS__style.css">
+  <script src="__ASSETS__toolbar.js"></script>
 </head>
 <body class="error-view">
-  <h1>Error {{code}}</h1>
-  <p>File: {{fileName}}</p>
-  <p>Path: {{filePath}}</p>
-  <pre>{{errorMsg}}</pre>
-  <pre>{{errorStack}}</pre>
-  <p><a href="{{referer}}">Go back</a></p>
+  <div class="markdown-body">
+    <h1>
+      {{#if (eq code 404)}}
+        <span class="error-code">404</span> File Not Found
+      {{else}}
+        <span class="error-code">{{code}}</span> Server Error
+      {{/if}}
+    </h1>
+
+    <div class="error-container">
+      <p>The file <code>{{fileName}}</code> could not be found or an error occurred.</p>
+      
+      {{#if errorMsg}}
+      <pre class="error-details"><code>{{errorMsg}}</code></pre>
+      {{/if}}
+
+      <div class="error-actions">
+        <a href="/" class="button">Back to repository root</a>
+        {{#if referer}}
+        <a href="{{referer}}" class="button secondary">Go back</a>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .error-view {
+      display: flex;
+      justify-content: center;
+      padding-top: 10vh;
+    }
+    .error-code {
+      color: #cf222e;
+      font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, monospace;
+    }
+    .error-container {
+      margin-top: 2rem;
+      padding: 2rem;
+      background: #f6f8fa;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+    }
+    html[data-theme="dark"] .error-container {
+      background: #161b22;
+      border-color: #30363d;
+    }
+    .error-details {
+      margin: 1.5rem 0;
+      background: #ffffff !important;
+    }
+    html[data-theme="dark"] .error-details {
+      background: #0d1117 !important;
+    }
+    .error-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 2rem;
+    }
+    .button {
+      display: inline-block;
+      padding: 5px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 20px;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      user-select: none;
+      background-color: #1f883d;
+      color: #ffffff;
+      border: 1px solid rgba(31, 35, 40, 0.15);
+      border-radius: 6px;
+      text-decoration: none;
+    }
+    .button:hover { background-color: #1a7f37; }
+    .button.secondary {
+      background-color: #f6f8fa;
+      color: #24292f;
+      border-color: #d0d7de;
+    }
+    .button.secondary:hover { background-color: #f3f4f6; }
+    html[data-theme="dark"] .button.secondary {
+      background-color: #21262d;
+      color: #c9d1d9;
+      border-color: #30363d;
+    }
+    html[data-theme="dark"] .button.secondary:hover { background-color: #30363d; }
+  </style>
 </body>
 </html>
