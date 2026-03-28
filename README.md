@@ -8,9 +8,9 @@
 
 # git-browse
 
-An agent writes the code. You still have to read it. git-browse is what you open instead of reaching for VS Code.
+The agent wrote the code. Now you have to read it. `git-browse` is a read-only project viewer for inspecting repository state without the setup or overhead of a full IDE.
 
-It's a read-only project browser — files, rendered markdown, and enough git context to know what changed. No extensions, no debugger, no cold start.
+It provides a high-fidelity view of your project with rendered markdown, git context, and a live change tracker centered on reviewing what your AI agent just did. No extensions to manage and zero cold start.
 
 ## Quick start
 
@@ -31,7 +31,7 @@ The URL is printed at startup (default: http://localhost:8080).
 
 ## Features
 
-- **Git dashboard** — branches, worktrees, tags, and a paginated commit log at `/_git`
+- **Git dashboard** — branches, worktrees, tags, and commit graph with paginated commit log at `/_git`
 - **Change tracker** — a running list of every file the agent touched while the browser's been open
 - **Command palette** — `Ctrl+Shift+P` / `Cmd+Shift+P` to jump to any file
 - **Rendered markdown** — GitHub-flavoured, with Mermaid, task lists, math, and theme-aware images
