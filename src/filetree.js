@@ -120,9 +120,12 @@
   function createNode(item, s) {
     var li = document.createElement('li');
     li.className = 'ft-item ' + (item.isDir ? 'ft-dir' : 'ft-file');
+    var currentPath = decodeURIComponent(window.location.pathname);
 
     if (item.isDir) {
-      var isExpanded = !!(s.expanded && s.expanded[item.href]);
+      // Expand if saved in state OR if it's a parent of the current path
+      var isExpanded = !!(s.expanded && s.expanded[item.href]) || 
+                       (currentPath.indexOf(item.href + '/') === 0);
 
       var row = document.createElement('div');
       row.className = 'ft-row';
@@ -183,7 +186,17 @@
       a.href = item.href;
       a.className = 'ft-file-link';
       a.title = item.name;
-      if (window.location.pathname === item.href) a.classList.add('ft-active');
+      if (currentPath === item.href) {
+        a.classList.add('ft-active');
+        li.classList.add('ft-active-li');
+        // Scroll into view once rendered and sidebar is visible
+        requestAnimationFrame(function() {
+          var sidebar = document.getElementById('filetree');
+          if (sidebar && !sidebar.classList.contains('ft-hidden')) {
+            a.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          }
+        });
+      }
 
       var iconName = window.__gitBrowseIcons ? window.__gitBrowseIcons.getFileIcon(item.name) : 'file';
       var fileIcon = document.createElement('span');
@@ -319,6 +332,12 @@
       var s = getState();
       delete s.hidden;
       saveState(s);
+      
+      // Scroll active file into view when unhidden
+      requestAnimationFrame(function() {
+        var active = sidebar.querySelector('.ft-active');
+        if (active) active.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      });
     });
 
     // Enable CSS transitions after first paint so page navigation is instant
