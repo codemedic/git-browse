@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 240" width="100%" height="100%">
+  <defs>
+    <style>
+      :root {
+        --bg-canvas: transparent;
+        --term-bg: #ffffff;
+        --term-border: #d0d7de;
+        --term-chrome: #f6f8fa;
+        --flash-color: #24292f;
+        --text-color: #57606a;
+        --text-color-alt: #0969da;
+        --text-color-keyword: #cf222e;
+        --folder-back-start: #CBD5E1;
+        --folder-back-end: #94A3B8;
+        --folder-front-start: #FFFFFF;
+        --folder-front-end: #F1F5F9;
+        --paper-bg: #F1F5F9;
+        --paper-line: #94A3B8;
+        --folder-border: rgba(0, 0, 0, 0.1);
+      }
+      .c-norm { --target-color: var(--text-color); }
+      .c-alt { --target-color: var(--text-color-alt); }
+      .c-keyword { --target-color: var(--text-color-keyword); }
+      .l1 { animation: typeL1 8s infinite both; }
+      .l2 { animation: typeL2 8s infinite both; }
+      .l3 { animation: typeL3 8s infinite both; }
+      .l4 { animation: typeL4 8s infinite both; }
+      .l5 { animation: typeL5 8s infinite both; }
+      .cursor { animation: cursorAnim 8s infinite both; }
+      .anim-paper { animation: paperPop 8s cubic-bezier(0.25, 1, 0.5, 1) infinite; }
+      .anim-shine { animation: paperShine 8s linear infinite; }
+      @keyframes typeL1 { 0%, 4% { opacity: 0; } 5% { opacity: 1; fill: var(--flash-color); } 10%, 89% { fill: var(--target-color); opacity: 1; } 90% { fill: var(--flash-color); opacity: 0.5; } 95%, 100% { opacity: 0; } }
+      @keyframes typeL2 { 0%, 14% { opacity: 0; } 15% { opacity: 1; fill: var(--flash-color); } 20%, 89% { fill: var(--target-color); opacity: 1; } 90% { fill: var(--flash-color); opacity: 0.5; } 95%, 100% { opacity: 0; } }
+      @keyframes typeL3 { 0%, 19% { opacity: 0; } 20% { opacity: 1; fill: var(--flash-color); } 25%, 89% { fill: var(--target-color); opacity: 1; } 90% { fill: var(--flash-color); opacity: 0.5; } 95%, 100% { opacity: 0; } }
+      @keyframes typeL4 { 0%, 29% { opacity: 0; } 30% { opacity: 1; fill: var(--flash-color); } 35%, 89% { fill: var(--target-color); opacity: 1; } 90% { fill: var(--flash-color); opacity: 0.5; } 95%, 100% { opacity: 0; } }
+      @keyframes typeL5 { 0%, 34% { opacity: 0; } 35% { opacity: 1; fill: var(--flash-color); } 40%, 89% { fill: var(--target-color); opacity: 1; } 90% { fill: var(--flash-color); opacity: 0.5; } 95%, 100% { opacity: 0; } }
+      @keyframes cursorAnim { 0%, 4% { opacity: 0; } 5%, 14% { opacity: 1; transform: translate(370px, 94px); } 15%, 19% { opacity: 1; transform: translate(480px, 114px); } 20%, 29% { opacity: 1; transform: translate(350px, 134px); } 30%, 34% { opacity: 1; transform: translate(470px, 154px); } 35% { opacity: 1; transform: translate(390px, 174px); } 37% { opacity: 0; transform: translate(390px, 174px); } 39% { opacity: 1; transform: translate(390px, 174px); } 41% { opacity: 0; transform: translate(390px, 174px); } 43% { opacity: 1; transform: translate(390px, 174px); } 45%, 100% { opacity: 0; transform: translate(390px, 174px); } }
+      @keyframes paperPop { 0%, 49% { transform: translateY(0); } 55%, 75% { transform: translateY(-60px); } 80%, 100% { transform: translateY(0); } }
+      @keyframes paperShine { 0%, 55% { transform: translateX(-60px) skewX(-20deg); opacity: 0; } 56% { opacity: 1; } 66% { transform: translateX(200px) skewX(-20deg); opacity: 1; } 67%, 100% { transform: translateX(200px) skewX(-20deg); opacity: 0; } }
+    </style>
+    <linearGradient id="backGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="var(--folder-back-start)"/><stop offset="100%" stop-color="var(--folder-back-end)"/></linearGradient>
+    <linearGradient id="frontGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="var(--folder-front-start)"/><stop offset="100%" stop-color="var(--folder-front-end)"/></linearGradient>
+    <linearGradient id="revealGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#8957E5"/><stop offset="100%" stop-color="#C084FC"/></linearGradient>
+    <linearGradient id="shineGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="white" stop-opacity="0"/><stop offset="50%" stop-color="white" stop-opacity="0.8"/><stop offset="100%" stop-color="white" stop-opacity="0"/></linearGradient>
+    <mask id="cutout-mask"><rect x="0" y="0" width="256" height="256" fill="white"/><g stroke="black" fill="black" stroke-linecap="round" stroke-linejoin="round"><path d="M 104 124 L 104 188" stroke-width="12.8"/><path d="M 104 164 C 104 134, 152 148, 152 124" stroke-width="12.8" fill="none"/><circle cx="104" cy="124" r="14"/><circle cx="104" cy="188" r="14"/><circle cx="152" cy="124" r="14"/></g></mask>
+    <clipPath id="term-clip"><rect x="210" y="40" width="550" height="160" rx="6"/></clipPath>
+    <clipPath id="paper-clip"><rect x="48" y="20" width="152" height="220" rx="4"/></clipPath>
+  </defs>
+  <rect width="100%" height="100%" fill="var(--bg-canvas)"/>
+  <g id="terminal">
+    <rect x="210" y="44" width="550" height="160" rx="6" fill="rgba(0,0,0,0.15)"/>
+    <g clip-path="url(#term-clip)">
+      <rect x="210" y="40" width="550" height="160" fill="var(--term-bg)"/>
+      <rect x="210" y="40" width="550" height="32" fill="var(--term-chrome)"/>
+      <path d="M210 72 L760 72" stroke="var(--term-border)" stroke-width="1"/>
+      <circle cx="230" cy="56" r="6" fill="#ef4444"/><circle cx="246" cy="56" r="6" fill="#eab308"/><circle cx="262" cy="56" r="6" fill="#22c55e"/>
+      <rect x="230" y="96" width="40" height="8" rx="2" class="l1 c-keyword"/><rect x="280" y="96" width="80" height="8" rx="2" class="l1 c-norm"/>
+      <rect x="250" y="116" width="60" height="8" rx="2" class="l2 c-norm"/><rect x="320" y="116" width="40" height="8" rx="2" class="l2 c-alt"/><rect x="370" y="116" width="100" height="8" rx="2" class="l2 c-norm"/>
+      <rect x="250" y="136" width="90" height="8" rx="2" class="l3 c-norm"/>
+      <rect x="230" y="156" width="50" height="8" rx="2" class="l4 c-keyword"/><rect x="290" y="156" width="120" height="8" rx="2" class="l4 c-norm"/><rect x="420" y="156" width="40" height="8" rx="2" class="l4 c-alt"/>
+      <rect x="250" y="176" width="70" height="8" rx="2" class="l5 c-norm"/><rect x="330" y="176" width="50" height="8" rx="2" class="l5 c-keyword"/>
+    </g>
+    <rect x="210" y="40" width="550" height="160" rx="6" fill="none" stroke="var(--term-border)" stroke-width="1.5"/>
+    <rect class="cursor" x="0" y="0" width="8" height="12" fill="var(--flash-color)"/>
+  </g>
+  <g id="folder" transform="translate(40, 40) scale(0.6)">
+    <path d="M 32 64 A 16 16 0 0 1 48 48 H 92 L 112 68 H 208 A 16 16 0 0 1 224 84 V 208 A 16 16 0 0 1 208 224 H 48 A 16 16 0 0 1 32 208 Z" fill="url(#backGrad)" stroke="var(--folder-border)" stroke-width="2"/>
+    <g class="anim-paper">
+      <rect x="48" y="20" width="152" height="220" rx="4" fill="var(--paper-bg)" stroke="var(--folder-border)" stroke-width="1"/>
+      <g opacity="0.95">
+        <rect x="64" y="40" width="40" height="4" rx="2" fill="var(--paper-line)"/><rect x="64" y="52" width="80" height="4" rx="2" fill="var(--paper-line)"/><rect x="64" y="64" width="60" height="4" rx="2" fill="var(--paper-line)"/><rect x="64" y="76" width="90" height="4" rx="2" fill="var(--paper-line)"/><rect x="64" y="88" width="50" height="4" rx="2" fill="var(--paper-line)"/>
+      </g>
+      <g clip-path="url(#paper-clip)"><rect class="anim-shine" x="0" y="0" width="60" height="220" fill="url(#shineGrad)"/></g>
+    </g>
+    <path d="M 32 112 A 16 16 0 0 1 48 96 H 208 A 16 16 0 0 1 224 112 V 208 A 16 16 0 0 1 208 224 H 48 A 16 16 0 0 1 32 208 Z" fill="url(#revealGrad)"/>
+    <path d="M 32 112 A 16 16 0 0 1 48 96 H 208 A 16 16 0 0 1 224 112 V 208 A 16 16 0 0 1 208 224 H 48 A 16 16 0 0 1 32 208 Z" fill="url(#frontGrad)" mask="url(#cutout-mask)"/><path d="M 32 112 A 16 16 0 0 1 48 96 H 208 A 16 16 0 0 1 224 112 V 208 A 16 16 0 0 1 208 224 H 48 A 16 16 0 0 1 32 208 Z" fill="none" stroke="var(--folder-border)" stroke-width="1.5" mask="url(#cutout-mask)"/>
+  </g>
+</svg>

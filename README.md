@@ -1,8 +1,8 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="src/assets/logo-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="src/assets/logo-light.svg">
-    <img alt="git-browse logo" src="src/assets/logo-light.svg" width="128" height="128">
+    <source media="(prefers-color-scheme: dark)" srcset="src/assets/banner-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="src/assets/banner-light.svg">
+    <img alt="git-browse logo" src="src/assets/banner-light.svg" width="800" height="240">
   </picture>
 </p>
 
