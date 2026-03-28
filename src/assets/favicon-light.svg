@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
   <defs>
     <linearGradient id="favBack" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#CBD5E1" />
@@ -13,17 +13,17 @@
       <stop offset="100%" stop-color="#C084FC" />
     </linearGradient>
     <mask id="favMask">
-      <rect width="64" height="64" fill="white" />
+      <rect width="48" height="48" fill="white" />
       <g stroke="black" fill="black" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M 24 30 L 24 48" stroke-width="4.5" />
-        <path d="M 24 39 C 24 30, 40 36, 40 30" stroke-width="4.5" fill="none" />
-        <circle cx="24" cy="30" r="4.5" />
-        <circle cx="24" cy="48" r="4.5" />
-        <circle cx="40" cy="30" r="4.5" />
+        <path d="M 16 20 L 16 38" stroke-width="4.5" />
+        <path d="M 16 29 C 16 20, 32 26, 32 20" stroke-width="4.5" fill="none" />
+        <circle cx="16" cy="20" r="4.5" />
+        <circle cx="16" cy="38" r="4.5" />
+        <circle cx="32" cy="20" r="4.5" />
       </g>
     </mask>
   </defs>
-  <path d="M 8 16 A 4 4 0 0 1 12 12 H 26 L 32 18 H 52 A 4 4 0 0 1 56 22 V 52 A 4 4 0 0 1 52 56 H 12 A 4 4 0 0 1 8 52 Z" fill="url(#favBack)" />
-  <path d="M 8 26 A 4 4 0 0 1 12 22 H 52 A 4 4 0 0 1 56 26 V 52 A 4 4 0 0 1 52 56 H 12 A 4 4 0 0 1 8 52 Z" fill="url(#favReveal)" />
-  <path d="M 8 26 A 4 4 0 0 1 12 22 H 52 A 4 4 0 0 1 56 26 V 52 A 4 4 0 0 1 52 56 H 12 A 4 4 0 0 1 8 52 Z" fill="url(#favFront)" mask="url(#favMask)" />
+  <path d="M 0 6 A 4 4 0 0 1 4 2 H 18 L 24 8 H 44 A 4 4 0 0 1 48 12 V 42 A 4 4 0 0 1 44 46 H 4 A 4 4 0 0 1 0 42 Z" fill="url(#favBack)" />
+  <path d="M 0 16 A 4 4 0 0 1 4 12 H 44 A 4 4 0 0 1 48 16 V 42 A 4 4 0 0 1 44 46 H 4 A 4 4 0 0 1 0 42 Z" fill="url(#favReveal)" />
+  <path d="M 0 16 A 4 4 0 0 1 4 12 H 44 A 4 4 0 0 1 48 16 V 42 A 4 4 0 0 1 44 46 H 4 A 4 4 0 0 1 0 42 Z" fill="url(#favFront)" mask="url(#favMask)" />
 </svg>
