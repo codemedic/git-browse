@@ -659,7 +659,27 @@ if (require.main === module) {
     msg('path', chalk`{grey ${style.address(dir)}}`)
 
     if (flags.livereloadport) {
-      const ig = ignore().add(['.git/', 'node_modules/'])
+      const ig = ignore().add([
+        '.git/',
+        'node_modules/',
+        '*.tmp.*',    // Claude Code and other temp files
+        '[._]s[a-v][a-z]', // Vim swap
+        '[._]sw[a-p]',     // Vim swap
+        '4913',       // Vim probe
+        '*~',         // Emacs/generic
+        '.#*',        // Emacs
+        '.DS_Store',
+        'Thumbs.db',
+        '.venv/',
+        '__pycache__/',
+        '.pytest_cache/',
+        '.eslintcache',
+        '.prettiercache',
+        '.tsbuildinfo',
+        '*.bak',
+        '*.old',
+        '*.orig'
+      ])
       for (const f of ['.gitignore', '.git/info/exclude']) {
         const full = path.join(dir, f)
         if (fs.existsSync(full)) ig.add(fs.readFileSync(full, 'utf8'))

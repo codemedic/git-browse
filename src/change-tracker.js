@@ -8,6 +8,35 @@
   var MOUNT_PREFIX   = '/var/www/';
   var MAX_FILES      = 100;
 
+  var IGNORE_PATTERNS = [
+    /\/\.git\//,
+    /\/node_modules\//,
+    /\.tmp\.\d+\.\d+$/, // Claude Code temp files (e.g. Makefile.tmp.123.456)
+    /\.sw[a-z]$/,       // Vim swap files (.swp, .swx, .swo, etc.)
+    /\/4913$/,          // Vim probe file
+    /~$/,               // Emacs/generic backup files
+    /\/\.#/,            // Emacs lock files
+    /\/\.DS_Store$/,    // macOS
+    /\/Thumbs\.db$/,    // Windows
+    /\/\.venv\//,       // Python
+    /\/__pycache__\//,  // Python
+    /\/\.pytest_cache\//,
+    /\/\.eslintcache$/,
+    /\/\.prettiercache$/,
+    /\/\.tsbuildinfo$/,
+    /\.bak$/,
+    /\.old$/,
+    /\.orig$/
+  ];
+
+  function shouldIgnore(rel) {
+    var path = '/' + rel;
+    for (var i = 0; i < IGNORE_PATTERNS.length; i++) {
+      if (IGNORE_PATTERNS[i].test(path)) return true;
+    }
+    return false;
+  }
+
   // ---------------------------------------------------------------------------
   // WebSocket interception — must run synchronously before livereload.js loads
   // ---------------------------------------------------------------------------
@@ -97,7 +126,7 @@
 
   function addChangedFile(rawPath) {
     var rel = normalizePath(rawPath);
-    if (!rel) return;
+    if (!rel || shouldIgnore(rel)) return;
 
     var files = loadChanges();
     files[rel] = Date.now();
