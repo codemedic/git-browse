@@ -1,17 +1,12 @@
 (function () {
   'use strict';
 
+  if (window.self !== window.top) return;
+
   // Bare mode: suppress all chrome for clean presentation / new-window viewing.
   // Applied synchronously so other scripts (theme-toggle etc.) never show chrome.
   var _bare = window.location.search.indexOf('bare') !== -1;
   if (_bare) document.documentElement.setAttribute('data-bare', '');
-
-  // SVG icon strings — GitHub Octicons paths, fill="currentColor" for theme support
-  var SVG_ARROW_RIGHT = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z"/></svg>';
-  var SVG_ARROW_DOWN  = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" d="M1.22 4.22a.75.75 0 0 1 1.06 0L8 9.94l5.72-5.72a.75.75 0 1 1 1.06 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0L1.22 5.28a.75.75 0 0 1 0-1.06z"/></svg>';
-  var SVG_FOLDER      = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25v-8.5A1.75 1.75 0 0 0 14.25 3H7.5a.25.25 0 0 1-.2-.1l-.9-1.2C6.07 1.26 5.55 1 5 1H1.75z"/></svg>';
-  var SVG_FILE        = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25V1.75zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 10 4.25V1.5H3.75zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011z"/></svg>';
-  // Git branch icon (GitHub Octicons)
 
   var STATE_KEY  = 'git-browse-filetree-v1';
   var CACHE_KEY  = 'git-browse-filetree-cache-v2'; // v2: git-aware JSON listing
@@ -27,11 +22,19 @@
     document.documentElement.style.setProperty('--ft-w', w + 'px');
   }
 
-  // Read saved width and apply synchronously (before DOMContentLoaded) so
-  // there is no layout shift on page load.
+  // Apply sidebar state synchronously (before DOMContentLoaded) so the body
+  // margin is set before first render — prevents layout shift on page load.
+  // document.body is not available at this point, so we drive the initial
+  // margin via an attribute on documentElement which CSS can select on.
   (function () {
     var saved = parseInt(localStorage.getItem(WIDTH_KEY), 10);
     if (saved >= MIN_WIDTH && saved <= MAX_WIDTH) applyWidth(saved);
+    if (!_bare) {
+      try {
+        var s = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
+        if (!s.hidden) document.documentElement.setAttribute('data-ft-open', '');
+      } catch (e) {}
+    }
   }());
 
   function getState() {
@@ -120,13 +123,15 @@
       var row = document.createElement('div');
       row.className = 'ft-row';
 
+      var arrowIcon = isExpanded ? 'chevron-down' : 'chevron-right';
       var arrow = document.createElement('span');
       arrow.className = 'ft-arrow';
-      arrow.innerHTML = isExpanded ? SVG_ARROW_DOWN : SVG_ARROW_RIGHT;
+      arrow.innerHTML = '<i data-lucide="' + arrowIcon + '"></i>';
 
+      var folderIconName = isExpanded ? 'folder-open' : 'folder';
       var folderIcon = document.createElement('span');
       folderIcon.className = 'ft-icon ft-icon-folder';
-      folderIcon.innerHTML = SVG_FOLDER;
+      folderIcon.innerHTML = '<i data-lucide="' + folderIconName + '"></i>';
 
       var label = document.createElement('span');
       label.className = 'ft-label';
@@ -152,16 +157,22 @@
         if (!s.expanded) s.expanded = {};
         if (children.style.display === 'none') {
           children.style.display = '';
-          arrow.innerHTML = SVG_ARROW_DOWN;
+          arrow.innerHTML = '<i data-lucide="chevron-down"></i>';
+          folderIcon.innerHTML = '<i data-lucide="folder-open"></i>';
           s.expanded[item.href] = true;
           if (!children.hasChildNodes()) loadChildren(item.href, children);
         } else {
           children.style.display = 'none';
-          arrow.innerHTML = SVG_ARROW_RIGHT;
+          arrow.innerHTML = '<i data-lucide="chevron-right"></i>';
+          folderIcon.innerHTML = '<i data-lucide="folder"></i>';
           delete s.expanded[item.href];
         }
         saveState(s);
+        if (window.__gitBrowseIcons) window.__gitBrowseIcons.create(row);
       });
+      
+      // Initialize icons for the newly created row immediately
+      if (window.__gitBrowseIcons) window.__gitBrowseIcons.create(row);
 
     } else {
       var a = document.createElement('a');
@@ -170,9 +181,10 @@
       a.title = item.name;
       if (window.location.pathname === item.href) a.classList.add('ft-active');
 
+      var iconName = window.__gitBrowseIcons ? window.__gitBrowseIcons.getFileIcon(item.name) : 'file';
       var fileIcon = document.createElement('span');
       fileIcon.className = 'ft-icon ft-icon-file';
-      fileIcon.innerHTML = SVG_FILE;
+      fileIcon.innerHTML = '<i data-lucide="' + iconName + '"></i>';
 
       var fileName = document.createElement('span');
       fileName.className = 'ft-file-name';
@@ -180,6 +192,9 @@
 
       a.appendChild(fileIcon);
       a.appendChild(fileName);
+      
+      if (window.__gitBrowseIcons) window.__gitBrowseIcons.create(a);
+
 
       // Shift+click: open in new window without the file-browser chrome
       a.addEventListener('click', function (e) {
@@ -279,6 +294,7 @@
       sidebar.classList.add('ft-hidden');
       toggleBtn.style.display = '';
       document.body.classList.remove('ft-open');
+      document.documentElement.removeAttribute('data-ft-open');
       var s = getState();
       s.hidden = true;
       saveState(s);
@@ -288,9 +304,18 @@
       sidebar.classList.remove('ft-hidden');
       toggleBtn.style.display = 'none';
       document.body.classList.add('ft-open');
+      document.documentElement.setAttribute('data-ft-open', '');
       var s = getState();
       delete s.hidden;
       saveState(s);
+    });
+
+    // Enable CSS transitions after first paint so page navigation is instant
+    // but user-initiated open/close still animates.
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        document.body.classList.add('ft-loaded');
+      });
     });
   });
 })();

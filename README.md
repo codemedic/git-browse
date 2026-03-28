@@ -1,80 +1,45 @@
 # git-browse
 
-A Docker-based local web UI for browsing a git repository in the browser.
+An agent writes the code. You still have to read it. git-browse is what you open instead of reaching for VS Code.
 
-Powered by [markserv](https://github.com/markserv/markserv).
+It's a read-only project browser — files, rendered markdown, and enough git context to know what changed. No extensions, no debugger, no cold start.
 
-## Features
-
-- **Markdown rendering** — GitHub-flavoured markdown with Mermaid diagram support, YAML frontmatter, and `<picture>` dark/light image switching
-- **Syntax highlighting** — see [supported file types](#supported-file-types)
-- **Line numbers** — sticky gutter on all code blocks
-- **Dark / light / auto theme** — follows OS preference by default; toggle overrides per-session
-- **Live reload** — file changes reflect immediately; respects `.gitignore` so ignored files never trigger reloads
-- **Change tracker** — toast listing all files modified since the page was loaded; navigate to any changed file or dismiss individually
-- **File tree sidebar** — resizable, collapsible, with scroll and expand state preserved
-- **Command palette** — `Ctrl+Shift+P` / `Cmd+Shift+P`; file search (`>` prefix switches to command mode), theme switching, git dashboard, change tracker
-- **Preview / source toggle** — for markdown and HTML files
-- **Git dashboard** — paginated commit log with branch graph at `/_git`
-- **Media preview** — images, PDFs, video, and audio open inline
-- **Bare mode** — `?bare` strips all chrome; Shift+click a file link opens it bare
-
-## Requirements
-
-- Docker with Compose V2
-
-## Installation
-
-Clone this repository anywhere on your machine:
+## Quick start
 
 ```sh
 git clone https://github.com/codemedic/git-browse.git ~/git-browse
-```
 
-Optionally add an alias so it's available from any directory:
-
-```sh
+# Add an alias to use it from anywhere
 # ~/.bashrc or ~/.zshrc
 alias git-browse="$HOME/git-browse/start.sh"
 ```
 
-## Usage
-
 ```sh
-# Serve the current directory
-git-browse
-
-# Serve a specific path
-git-browse /path/to/repo
+git-browse           # serve the current directory
+git-browse /path     # or a specific path
 ```
 
-Then open <http://localhost:8080> (the actual port may differ if 8080 is already in use — the URL is printed at startup).
+The URL is printed at startup (default: http://localhost:8080).
+
+## Features
+
+- **Git dashboard** — branches, worktrees, tags, and a paginated commit log at `/_git`
+- **Change tracker** — a running list of every file the agent touched while the browser's been open
+- **Command palette** — `Ctrl+Shift+P` / `Cmd+Shift+P` to jump to any file
+- **Rendered markdown** — GitHub-flavoured, with Mermaid, task lists, math, and theme-aware images
+- **Live reload** — updates on save, respects `.gitignore`
+- **Bare mode** — `?bare` strips the chrome; Shift+click any link to open it that way
 
 ## Multiple instances
 
-Each invocation derives a deterministic compose project name from the repository path, so different repositories run in fully isolated containers. If the default HTTP or livereload port is already taken, the next free port is selected automatically.
+Each invocation gets a project name derived from the repo path, so different repos run in isolated containers. If a port is taken, the next free one is used. Running the same repo twice attaches to the existing instance rather than starting a duplicate.
 
-Running the same repository a second time attaches to the existing instance's logs rather than starting a duplicate.
+## Roadmap
 
-## Supported file types
+The next focus is a proper review workflow — not just "file X changed" but what actually changed in it:
 
-Code files are rendered with syntax highlighting when browsed directly:
-
-| Category | Extensions |
-|---|---|
-| JavaScript / TypeScript | `.js` `.mjs` `.cjs` `.jsx` `.ts` `.tsx` |
-| Python | `.py` |
-| Systems | `.go` `.rs` `.c` `.cpp` `.cc` `.h` `.hpp` `.java` `.cs` `.swift` `.kt` `.scala` |
-| Scripting | `.rb` `.php` `.lua` `.r` |
-| Shell | `.sh` `.bash` `.zsh` `.fish` |
-| Styles | `.css` `.scss` `.less` `.sass` |
-| Data / Config | `.json` `.yml` `.yaml` `.toml` `.ini` `.xml` `.sql` |
-| Infrastructure | `.tf` `.hcl` `.proto` |
-| Misc | `.vim` `.mk` `Dockerfile` `Makefile` `Jenkinsfile` `Vagrantfile` |
-
-Markdown files (`.md`, `.markdown`, and others) are always rendered as HTML.
-
-Files with unrecognised extensions that are detected as binary show file info and are offered as downloads.
+- [ ] **Diff view** — inline unified diff per file, staged and unstaged
+- [ ] **Agent change summary** — when the change tracker fires, show a readable diff alongside the filename
 
 ## License
 

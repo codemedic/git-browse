@@ -1,109 +1,58 @@
-# git-browse — AI Agent Notes
+# AI Agent Guide: GitBrowse Architecture
 
-## What This Project Is
+This document explains the codebase for AI agents.
 
-A Docker-based, read-only web UI for browsing a git repo's working tree in a browser. Powered by
-[markserv](https://github.com/markserv/markserv) (a Node.js markdown/directory server). All
-customisation is layered on top of markserv without forking it.
+## 🏗️ Architecture
 
-## Architecture
+GitBrowse is a standalone Node.js server built with **Express**. It serves as a
+markdown and directory browser with deep Git integration.
 
-### Customisation Strategy
+### Core Components
 
-markserv is installed globally inside the Docker image and then **monkey-patched at build time**.
-`src/patch-server.js` applies string-replacement patches to markserv's `server.js` before the
-server starts. Patch fragments live in `src/patches/`.
+- **Server (`src/server.js`):** The main entry point. Handles:
+    - CLI flag parsing (port, directory, etc.)
+    - Markdown rendering (using `markdown-it` and plugins)
+    - Handlebars templating with `implant` support for recursive inclusions
+    - Virtual Git routes (`/_git/*`) for repository state, logs, and diffs
+    - Virtual File routes (`/_files/*`) for git-aware search and exploration
+    - LiveReload with `.gitignore` filtering
+- **Templates (`src/templates/`):** Handlebars templates for the UI chrome.
+- **Client Scripts (`src/*.js`):** Vanilla JS scripts served to the browser. These
+  provide the interactive features like the command palette, file tree, and git
+  dashboard.
+- **Styles (`src/dark.css`):** The primary stylesheet.
 
-Current patches (in application order):
+## 🗣️ Target Userbase
 
-| # | Fragment | Target in `server.js` | Purpose |
-|---|---|---|---|
-| 1 | `src/patches/other.js` | `else { // Other: Browser requests...` | Code highlighting, media viewers, binary detection, plain-text fallback |
-| 2 | `src/patches/dir.js` | `} else if (isDir) {` | Directory listing + README auto-render |
-| 3 | `src/patches/html.js` | `} else if (isHtml) {` | Sandboxed HTML preview + source toggle |
-| 4 | `src/patches/markdown.js` | `if (isMarkdown) {` | Rendered preview + raw source toggle |
-| 5 | `src/patches/git-state.js` | (virtual routes) | Git dashboard at `/_git` — branches, worktrees, commit log, file diff |
-| 7 | `src/patches/files.js`     | (virtual routes) | File search API at `/_files/search?q=` — recursive `fs.readdirSync` walk, excludes `.git/` |
+The target users are **experienced developers** who use modern IDEs (like VS Code) and AI coding agents daily. They expect a high baseline of functionality (e.g., syntax highlighting, markdown rendering, responsive UI) as a given.
 
-When adding a new patch, inject it before `const prettyPath = filePath` (line ~426 in
-`server.js`) — immediately after the `isMarkservUrl` early-return block. This is the cleanest
-entry point for new virtual route handlers.
+### README updates
 
-**Test fixture:** `test/fixtures/server-original.js` is a snapshot of the unpatched markserv
-`server.js`. Tests validate patches apply cleanly against it. Keep it in sync with the installed
-markserv version.
+@~/.claude/docs/readme-style.md
 
-### Client-Side Scripts
+## 🛠️ Development Workflow
 
-All vanilla JS, ES5-style IIFEs. No framework, no bundler. Copied into markserv's templates
-directory at build time and injected into HTML templates via `sed` in the Dockerfile.
+### Server-side changes
+Edit `src/server.js` directly. The server uses standard Express patterns.
+If adding new dependencies, update `package.json`.
 
-| Script | Purpose |
-|---|---|
-| `src/filetree.js` | Resizable sidebar file tree with expand/collapse, caching, scroll persistence |
-| `src/toolbar.js`          | Toolbar (theme cycle, git dashboard, command palette trigger) — replaces standalone theme-toggle |
-| `src/mermaid-init.js` | Mermaid diagram rendering (ES module, loaded from CDN) |
-| `src/offline-check.js` | Offline detection, toast notification, auto-reconnect polling |
-| `src/preview-toggle.js` | Preview / source panel switcher for markdown and HTML |
-| `src/line-numbers.js` | Sticky line numbers with frosted-glass gutter for code blocks |
-| `src/picture-theme.js`    | Syncs `<picture>` source selection with the `data-theme` attribute |
-| `src/git-state.js`        | Git dashboard UI — branches, worktrees, commit log with inline expand, file diff |
-| `src/command-palette.js`  | VS Code-style Command Palette (Ctrl+Shift+P / Cmd+Shift+P) — file navigation, git dashboard, theme switching |
+### Client-side changes
+Client scripts are located in `src/`. They are served as-is to the browser.
+They use vanilla JS and DOM APIs for maximum compatibility and zero build step.
 
-### Command Palette
+## 🧪 Testing
 
-The `BUILTINS` array in `src/command-palette.js` is the registry of non-file commands. **When adding a major new feature, add a corresponding entry to `BUILTINS`** so users can discover and activate it from the palette. Each entry needs `label`, `icon` (inline SVG string), and `action` (function).
+Tests are located in `test/` and use Node's built-in test runner.
+Run tests with: `npm test`
 
-### CSS
+The primary integration test is `test/server.test.js`, which uses `supertest`
+to verify server routes and rendering logic.
 
-`src/dark.css` is appended to markserv's `markserv.css` at build time. Follows the pattern:
+## 📦 Docker
 
-1. Light-mode defaults (no selector prefix)
-2. `@media (prefers-color-scheme: dark) { html:not([data-theme="light"]) ... }` — OS dark, no override
-3. `html[data-theme="dark"] ...` — user-forced dark
+The `Dockerfile` builds a lightweight image that:
+1. Installs Node.js dependencies
+2. Copies the source code
+3. Runs `src/server.js` as the entry point
 
-CSS custom properties for theming are defined on `:root` in `src/dark.css`.
-
-### Docker / Runtime
-
-- Image: `node:lts-alpine`
-- markserv installed globally inside the container only
-- Repo mounted read-only at `/var/www`
-- Live reload on a separate port (default 35729), watches working tree — **excludes `.git/`**
-- `start.sh` finds free ports, derives a deterministic compose project name from the repo path
-
-## Development Rules
-
-- **Never `npm install -g`** on the host. markserv's global install happens inside Docker only.
-  All host-side Node tooling (tests etc.) must use locally installed modules.
-- **No frontend framework or bundler.** Keep client scripts as plain ES5 IIFEs.
-- **No CDN dependencies for critical path** — only Mermaid (non-critical, gracefully skipped if offline).
-- All features are **read-only** — no write operations on the mounted repo, ever.
-- **Fast startup is a priority.** Minimise Docker image size and build time. Avoid heavy
-  dependencies. Prefer lazy-loading and incremental rendering over blocking on large data sets.
-- **Conventional Commits** — all commit messages must use the conventional commits format:
-  `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `chore:`, etc.
-  Scope is optional but encouraged, e.g. `feat(git-dashboard):`, `fix(filetree):`.
-
-## Running
-
-```bash
-# Serve the current directory
-./start.sh
-
-# Serve a specific repo
-./start.sh /path/to/repo
-
-# Run tests (no npm install needed — uses Node built-in test runner)
-npm test
-```
-
-## Key Constraints to Keep in Mind
-
-- The test fixture `test/fixtures/server-original.js` must match the markserv version in the
-  Dockerfile. If markserv is upgraded, update the fixture.
-- Patch target strings in `src/patch-server.js` are **exact** matches against `server.js`. Each
-  patch has a guard that exits non-zero if the target is not found — a broken build beats a
-  silently mis-patched server.
-- `.git/` is excluded from livereload watching. Any feature that reacts to git state changes
-  (e.g. the git dashboard) must use client-side polling, not livereload.
+The server is configured to serve the `/var/www` directory by default.

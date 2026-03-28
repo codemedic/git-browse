@@ -1,5 +1,5 @@
 services:
-  markserv:
+  git-browse:
     build: .
     ports:
       - "${PORT:-8080}:8080"

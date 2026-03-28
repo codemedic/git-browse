@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  if (window.self !== window.top) return;
+
   var STORAGE_KEY    = 'git-browse-changed-files';
   var MINIMIZED_KEY  = 'git-browse-change-toast-minimized';
   var MOUNT_PREFIX   = '/var/www/';
@@ -16,7 +18,7 @@
   // currently displayed in the browser.
   // Directory views (pathname ends with '/') always allow reload — the listing
   // may have changed.  Special routes (/_git, /_files) never reload on file changes.
-  // Matches markserv's dir.js readme lookup: readme[.md|.markdown|.txt]
+  // Matches server's readme lookup: readme[.md|.markdown|.txt]
   var README_RE = /^readme(\.md|\.markdown|\.txt)?$/i;
 
   function isCurrentFile(rawPath) {
@@ -181,7 +183,7 @@
 
       var toggle = document.createElement('span');
       toggle.className = 'change-tree-toggle';
-      toggle.innerHTML = '<span class="change-tree-dir-icon">&#x25BC;</span> ' + escapeHtml(dirLabel);
+      toggle.innerHTML = '<span class="change-tree-dir-icon"><i data-lucide="chevron-down"></i></span> ' + escapeHtml(dirLabel);
       toggle.setAttribute('role', 'button');
       toggle.setAttribute('tabindex', '0');
 
@@ -191,7 +193,10 @@
           var isHidden = subEl.style.display === 'none';
           subEl.style.display = isHidden ? '' : 'none';
           var icon = this.querySelector('.change-tree-dir-icon');
-          if (icon) icon.innerHTML = isHidden ? '&#x25BC;' : '&#x25B6;';
+          if (icon) {
+            icon.innerHTML = '<i data-lucide="' + (isHidden ? 'chevron-down' : 'chevron-right') + '"></i>';
+            if (window.__gitBrowseIcons) window.__gitBrowseIcons.create(icon);
+          }
         };
       }(subtree));
 
@@ -206,16 +211,18 @@
         var li = document.createElement('li');
         li.className = 'change-tree-file';
 
+        var iconName = window.__gitBrowseIcons ? window.__gitBrowseIcons.getFileIcon(fileEntry.name) : 'file';
+
         var link = document.createElement('a');
         link.className = 'change-tree-file-link';
         link.href = '/' + fileEntry.fullPath;
         link.title = fileEntry.fullPath;
-        link.innerHTML = '<span class="change-tree-file-icon" aria-hidden="true">&#x1F4C4;</span> ' + escapeHtml(fileEntry.name);
+        link.innerHTML = '<span class="change-tree-file-icon" aria-hidden="true"><i data-lucide="' + iconName + '"></i></span> <span class="change-tree-file-name">' + escapeHtml(fileEntry.name) + '</span>';
 
         var dismissBtn = document.createElement('button');
         dismissBtn.className = 'change-tree-dismiss-btn';
         dismissBtn.setAttribute('aria-label', 'Dismiss ' + fileEntry.name);
-        dismissBtn.textContent = '\u00D7';
+        dismissBtn.innerHTML = '<i data-lucide="x"></i>';
         dismissBtn.addEventListener('click', function (e) {
           e.preventDefault();
           e.stopPropagation();
@@ -226,6 +233,11 @@
         li.appendChild(dismissBtn);
         ul.appendChild(li);
       }(node.files[j]));
+    }
+
+    // Initialize icons if possible
+    if (window.__gitBrowseIcons) {
+      setTimeout(function() { window.__gitBrowseIcons.create(ul); }, 0);
     }
 
     return ul;
@@ -347,6 +359,18 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     var files = loadChanges();
+
+    // If we're on an error page (e.g. 404 because file was deleted),
+    // remove the current file from the changed list.
+    if (document.body.classList.contains('error-view')) {
+      var pathname = window.location.pathname;
+      var rel = normalizePath(pathname);
+      if (files[rel]) {
+        delete files[rel];
+        saveChanges(files);
+      }
+    }
+
     if (fileCount(files) > 0) renderToast(files);
   });
 

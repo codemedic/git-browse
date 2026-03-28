@@ -25,7 +25,6 @@
         var original = src.getAttribute('data-original-media');
 
         if (!theme) {
-          // Auto mode — restore the original media query and let the browser decide.
           src.setAttribute('media', original);
         } else {
           var isDark  = DARK_MQ.test(original);
@@ -40,7 +39,7 @@
     }
   }
 
-  // Run on initial load to handle the theme already set by theme-toggle.js.
+  // Run on initial load to handle the theme already set by toolbar.js.
   document.addEventListener('DOMContentLoaded', syncPictures);
 
   // Re-run whenever data-theme is added, removed, or changed.

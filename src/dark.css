@@ -1,3 +1,5 @@
+@import url('https://cdn.jsdelivr.net/npm/@fontsource/iosevka/index.css');
+
 /* --- Mermaid error display (light + dark) --- */
 .mermaid-error {
   border: 1px solid #f5a623;
@@ -25,10 +27,146 @@ html[data-theme="dark"] .mermaid-error summary { color: #9ca3af; }
 html[data-theme="dark"] .mermaid-error-msg { background: #1f1200; border-color: #d97706; }
 html[data-theme="dark"] .mermaid-error-src { background: #161b22; border-color: #30363d; color: #e6edf3; }
 
-/* Dark mode colours — applied when:
-   (a) OS preference is dark and user hasn't forced light, OR
-   (b) user has explicitly selected dark via data-theme="dark" on <html>
-*/
+/* --- GitHub Markdown Base (Light) --- */
+.markdown-body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: 16px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  color: #1f2328;
+}
+
+.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.markdown-body h1 { font-size: 2em; padding-bottom: 0.3em; border-bottom: 1px solid #d0d7de; }
+.markdown-body h2 { font-size: 1.5em; padding-bottom: 0.3em; border-bottom: 1px solid #d0d7de; }
+.markdown-body h3 { font-size: 1.25em; }
+.markdown-body h4 { font-size: 1em; }
+.markdown-body h5 { font-size: 0.875em; }
+.markdown-body h6 { font-size: 0.85em; color: #656d76; }
+
+.markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body table, .markdown-body pre {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.markdown-body blockquote {
+  padding: 0 1em;
+  color: #656d76;
+  border-left: 0.25em solid #d0d7de;
+}
+
+.markdown-body ul, .markdown-body ol { padding-left: 2em; }
+.markdown-body ul ul, .markdown-body ul ol, .markdown-body ol ol, .markdown-body ol ul { margin-top: 0; margin-bottom: 0; }
+.markdown-body li { word-wrap: break-all; }
+.markdown-body li > p { margin-top: 16px; }
+.markdown-body li + li { margin-top: 0.25em; }
+
+.markdown-body code {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 95%;
+  white-space: break-spaces;
+  background-color: rgba(175, 184, 193, 0.2);
+  border-radius: 6px;
+  font-family: "Iosevka", ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+}
+
+.markdown-body pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 95%;
+  line-height: 1.45;
+  background-color: #f6f8fa;
+  border-radius: 6px;
+  position: relative;
+}
+
+.markdown-body pre code {
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  background-color: transparent;
+  border: 0;
+}
+
+.markdown-body table {
+  display: block;
+  width: 100%;
+  width: max-content;
+  max-width: 100%;
+  overflow: auto;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+.markdown-body table th, .markdown-body table td {
+  padding: 6px 13px;
+  border: 1px solid #d0d7de;
+}
+
+.markdown-body table tr {
+  background-color: #ffffff;
+  border-top: 1px solid #d8dee4;
+}
+
+.markdown-body table tr:nth-child(2n) { background-color: #f6f8fa; }
+
+.markdown-body img { max-width: 100%; box-sizing: content-box; }
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .markdown-body img { background-color: transparent; }
+}
+
+html[data-theme="dark"] .markdown-body img { background-color: transparent; }
+.markdown-body hr { height: 0.25em; padding: 0; margin: 24px 0; background-color: #d0d7de; border: 0; }
+
+/* --- Syntax highlighting: GitHub Light theme --- */
+.hljs-doctag,
+.hljs-keyword,
+.hljs-meta .hljs-keyword,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-variable.language_ { color: #d73a49; }
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.class_.inherited__,
+.hljs-title.function_ { color: #6f42c1; }
+.hljs-attr,
+.hljs-attribute,
+.hljs-literal,
+.hljs-meta,
+.hljs-number,
+.hljs-operator,
+.hljs-variable,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-id { color: #005cc5; }
+.hljs-regexp,
+.hljs-string,
+.hljs-meta .hljs-string { color: #032f62; }
+.hljs-built_in,
+.hljs-symbol { color: #e36209; }
+.hljs-comment,
+.hljs-code,
+.hljs-formula { color: #6a737d; }
+.hljs-name,
+.hljs-quote,
+.hljs-selector-tag,
+.hljs-selector-pseudo { color: #22863a; }
+.hljs-subst { color: #24292e; }
+.hljs-section { color: #005cc5; font-weight: bold; }
+.hljs-bullet { color: #735c0f; }
+.hljs-emphasis { color: #24292e; font-style: italic; }
+.hljs-strong { color: #24292e; font-weight: bold; }
+.hljs-addition { color: #22863a; background-color: #f0fff4; }
+.hljs-deletion { color: #b31d28; background-color: #ffeef0; }
 
 /* --- Markdown frontmatter (YAML) --- */
 .markdown-frontmatter {
@@ -43,6 +181,7 @@ html[data-theme="dark"] .mermaid-error-src { background: #161b22; border-color: 
   padding: 0 !important;
   background-color: transparent !important;
   border: none !important;
+  position: relative;
 }
 .markdown-frontmatter pre code {
   padding: 0 !important;
@@ -66,16 +205,16 @@ html[data-theme="dark"] .mermaid-error-src { background: #161b22; border-color: 
 /* --- Auto: OS dark + no user override --- */
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"])                             { background-color: var(--dark-bg); }
-  html:not([data-theme="light"]) body                        { background-color: var(--dark-bg); }
+  html:not([data-theme="light"]) body                        { background-color: var(--dark-bg); color: var(--dark-text); }
   @media screen and (min-width: 768px) {
     html:not([data-theme="light"]) body                      { border-color: var(--dark-border); outline-color: var(--dark-bg); }
   }
-  html:not([data-theme="light"]) .markdown-body              { color: var(--dark-text); }
+  html:not([data-theme="light"]) .markdown-body              { color: var(--dark-text); background-color: var(--dark-bg); }
   html:not([data-theme="light"]) .markdown-body a            { color: var(--dark-link); }
   html:not([data-theme="light"]) .markdown-body h1,
   html:not([data-theme="light"]) .markdown-body h2           { border-bottom-color: var(--dark-border-sub); }
   html:not([data-theme="light"]) .markdown-body h6           { color: var(--dark-muted); }
-  html:not([data-theme="light"]) .markdown-body hr           { background-color: var(--dark-border-sub); border-bottom-color: var(--dark-border-sub); }
+  html:not([data-theme="light"]) .markdown-body hr           { background-color: var(--dark-border-sub); }
   html:not([data-theme="light"]) .markdown-body blockquote   { color: var(--dark-muted); border-left-color: var(--dark-border); }
   html:not([data-theme="light"]) .markdown-body table th,
   html:not([data-theme="light"]) .markdown-body table td     { border-color: var(--dark-border); }
@@ -136,16 +275,16 @@ html[data-theme="dark"] .mermaid-error-src { background: #161b22; border-color: 
 
 /* --- Forced dark: user selected dark mode explicitly --- */
 html[data-theme="dark"]                             { background-color: var(--dark-bg); }
-html[data-theme="dark"] body                        { background-color: var(--dark-bg); }
+html[data-theme="dark"] body                        { background-color: var(--dark-bg); color: var(--dark-text); }
 @media screen and (min-width: 768px) {
   html[data-theme="dark"] body                      { border-color: var(--dark-border); outline-color: var(--dark-bg); }
 }
-html[data-theme="dark"] .markdown-body              { color: var(--dark-text); }
+html[data-theme="dark"] .markdown-body              { color: var(--dark-text); background-color: var(--dark-bg); }
 html[data-theme="dark"] .markdown-body a            { color: var(--dark-link); }
 html[data-theme="dark"] .markdown-body h1,
 html[data-theme="dark"] .markdown-body h2           { border-bottom-color: var(--dark-border-sub); }
 html[data-theme="dark"] .markdown-body h6           { color: var(--dark-muted); }
-html[data-theme="dark"] .markdown-body hr           { background-color: var(--dark-border-sub); border-bottom-color: var(--dark-border-sub); }
+html[data-theme="dark"] .markdown-body hr           { background-color: var(--dark-border-sub); }
 html[data-theme="dark"] .markdown-body blockquote   { color: var(--dark-muted); border-left-color: var(--dark-border); }
 html[data-theme="dark"] .markdown-body table th,
 html[data-theme="dark"] .markdown-body table td     { border-color: var(--dark-border); }
@@ -239,6 +378,8 @@ html[data-theme="dark"] a.button.back               { background-color: var(--da
 }
 .toolbar-btn:hover { background: rgba(0, 0, 0, 0.07); }
 .toolbar-icon-btn { padding: 3px 5px; }
+.toolbar-btn-icon { display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; }
+.toolbar-btn-icon svg.lucide { width: 100%; height: 100%; }
 .toolbar-btn-active { color: #0969da; }
 
 @media (prefers-color-scheme: dark) {
@@ -269,14 +410,17 @@ html[data-theme="dark"] .toolbar-btn-active         { color: #58a6ff; }
   z-index: 1000;
   font-size: 13px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  transition: transform 0.2s ease;
   box-sizing: border-box;
   padding-bottom: 40px;
 }
 #filetree.ft-hidden { transform: translateX(calc(-1 * var(--ft-w))); }
 
-body.ft-open { margin-left: calc(var(--ft-w) + 32px) !important; transition: margin-left 0.2s ease; }
-body:not(.ft-open) { transition: margin-left 0.2s ease; }
+/* Initial margin driven from <html> attribute set synchronously before first render */
+html[data-ft-open] body { margin-left: calc(var(--ft-w) + 32px) !important; }
+
+/* Transitions only after initial layout to prevent judder on page load */
+body.ft-loaded #filetree { transition: transform 0.2s ease; }
+body.ft-loaded { transition: margin-left 0.2s ease; }
 
 /* Suppress transitions while the user is actively dragging the resize handle */
 body.ft-resizing #filetree,
@@ -346,10 +490,11 @@ body.ft-resizing .ft-resize-handle { background: rgba(9, 105, 218, 0.25); }
 }
 .ft-row:hover { background: #eaeef2; }
 
-.ft-arrow { color: #8c959f; flex-shrink: 0; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
+.ft-arrow { color: #656d76; flex-shrink: 0; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
 .ft-icon  { flex-shrink: 0; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
-.ft-icon-folder { color: #d69e2e; }
-.ft-icon-file   { color: #8c959f; }
+.ft-arrow svg.lucide, .ft-icon svg.lucide { width: 100%; height: 100%; }
+.ft-icon-folder { color: #9a6700; }
+.ft-icon-file   { color: #656d76; }
 .ft-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; min-width: 0; }
 
 .ft-file-link {
@@ -397,8 +542,9 @@ body.ft-resizing .ft-resize-handle { background: rgba(9, 105, 218, 0.25); }
   html:not([data-theme="light"]) .ft-close-btn         { color: #8b949e; }
   html:not([data-theme="light"]) .ft-row               { color: #e6edf3; }
   html:not([data-theme="light"]) .ft-row:hover         { background: #21262d; }
-  html:not([data-theme="light"]) .ft-arrow             { color: #8b949e; }
-  html:not([data-theme="light"]) .ft-icon-file         { color: #8b949e; }
+  html:not([data-theme="light"]) .ft-arrow             { color: #adb5bd; }
+  html:not([data-theme="light"]) .ft-icon-folder       { color: #e3b341; }
+  html:not([data-theme="light"]) .ft-icon-file         { color: #adb5bd; }
   html:not([data-theme="light"]) .ft-file-link         { color: #58a6ff; }
   html:not([data-theme="light"]) .ft-file-link:hover   { background: #21262d; }
   html:not([data-theme="light"]) .ft-file-link.ft-active { background: #1c2d40; color: #58a6ff; }
@@ -413,8 +559,9 @@ html[data-theme="dark"] .ft-header            { background: #21262d; border-colo
 html[data-theme="dark"] .ft-close-btn         { color: #8b949e; }
 html[data-theme="dark"] .ft-row               { color: #e6edf3; }
 html[data-theme="dark"] .ft-row:hover         { background: #21262d; }
-html[data-theme="dark"] .ft-arrow             { color: #8b949e; }
-html[data-theme="dark"] .ft-icon-file         { color: #8b949e; }
+html[data-theme="dark"] .ft-arrow             { color: #adb5bd; }
+html[data-theme="dark"] .ft-icon-folder       { color: #e3b341; }
+html[data-theme="dark"] .ft-icon-file         { color: #adb5bd; }
 html[data-theme="dark"] .ft-file-link         { color: #58a6ff; }
 html[data-theme="dark"] .ft-file-link:hover   { background: #21262d; }
 html[data-theme="dark"] .ft-file-link.ft-active { background: #1c2d40; color: #58a6ff; }
@@ -465,7 +612,7 @@ html[data-theme="dark"] #filetree-open-btn    { background: rgba(22, 27, 34, 0.8
   font-size: 14px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  z-index: 99999;
+  z-index: 100000;
   opacity: 0;
   transition: opacity 0.2s ease;
 }
@@ -482,18 +629,21 @@ html[data-theme="dark"] #filetree-open-btn    { background: rgba(22, 27, 34, 0.8
 }
 #offline-toast-dismiss:hover { opacity: 1; }
 
-/* --- Fluid layout: override markserv's fixed 978px body --- */
+/* --- Fluid layout: override default fixed 978px body --- */
 /* Body fills the viewport; text content is capped for readability;
    media viewers are free to expand to full available width. */
 body {
   width: auto;
   max-width: 100%;
   margin: 16px 32px;
+  background-color: #ffffff;
 }
 /* Constrain text content (markdown, code) but not media viewer pages */
-article.markdown-body:not(:has(.bin-viewer)) {
-  max-width: 978px;
+article.markdown-body:not(:has(.bin-viewer)),
+.markdown-body:not(:has(.bin-viewer)) {
+  max-width: 1012px;
   margin: 0 auto;
+  padding: 45px;
 }
 .bin-viewer {
   width: 100%;
@@ -501,7 +651,9 @@ article.markdown-body:not(:has(.bin-viewer)) {
 
 /* --- Bare mode: clean presentation without file-browser chrome --- */
 /* data-bare is set on <html> synchronously by filetree.js on ?bare URLs */
-[data-bare] #theme-toggle,
+[data-bare] #toolbar,
+[data-bare] #change-toast,
+[data-bare] #filetree-open-btn,
 [data-bare] .source-toggle-bar { display: none !important; }
 /* Body has no ft-open margin in bare mode (sidebar is never created) */
 
@@ -604,6 +756,75 @@ html[data-theme="dark"] .html-preview-frame { border-color: var(--dark-border); 
   font-size: 12px;
 }
 
+/* --- Tabs --- */
+.git-tabs {
+  margin-bottom: 16px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.git-tabs-header {
+  display: flex;
+  background: #f6f8fa;
+  border-bottom: 1px solid #d0d7de;
+}
+.git-tab-btn {
+  padding: 6px 14px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: #57606a;
+  border-right: 1px solid #d0d7de;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.git-tab-btn:hover { background: #eaeef2; }
+.git-tab-btn.active {
+  background: #ffffff;
+  color: #1f2328;
+  border-bottom: 2px solid #fd8c73;
+  margin-bottom: -1px;
+  padding-bottom: 5px;
+}
+.git-tab-btn svg.lucide {
+  width: 14px;
+  height: 14px;
+}
+.git-tab-content {
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 12px;
+}
+.git-tab-panel { display: none; }
+.git-tab-panel.active { display: block; }
+
+.git-tab-panel .git-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.git-tab-panel .git-table td,
+.git-tab-panel .git-table th {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .git-tabs { border-color: var(--dark-border); }
+  html:not([data-theme="light"]) .git-tabs-header { background: #161b22; border-bottom-color: var(--dark-border); }
+  html:not([data-theme="light"]) .git-tab-btn { color: var(--dark-muted); border-right-color: var(--dark-border); }
+  html:not([data-theme="light"]) .git-tab-btn:hover { background: #21262d; }
+  html:not([data-theme="light"]) .git-tab-btn.active { background: var(--dark-bg); color: var(--dark-text); border-bottom-color: #f78166; }
+}
+html[data-theme="dark"] .git-tabs { border-color: var(--dark-border); }
+html[data-theme="dark"] .git-tabs-header { background: #161b22; border-bottom-color: var(--dark-border); }
+html[data-theme="dark"] .git-tab-btn { color: var(--dark-muted); border-right-color: var(--dark-border); }
+html[data-theme="dark"] .git-tab-btn:hover { background: #21262d; }
+html[data-theme="dark"] .git-tab-btn.active { background: var(--dark-bg); color: var(--dark-text); border-bottom-color: #f78166; }
+
 /* --- Sections --- */
 .git-sections { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
 .git-section  { flex: 1; min-width: 240px; }
@@ -642,7 +863,7 @@ html[data-theme="dark"] .html-preview-frame { border-color: var(--dark-border); 
   text-overflow: ellipsis;
   max-width: 280px;
 }
-.git-wt-path { font-family: monospace; font-size: 12px; }
+.git-wt-path { font-family: "Iosevka", monospace; font-size: 12px; }
 /* Worktrees table: let path and branch columns use full available width */
 .git-wt-table td { max-width: none; }
 
@@ -701,7 +922,7 @@ html[data-theme="dark"] .html-preview-frame { border-color: var(--dark-border); 
   line-height: 1.4;
 }
 
-.git-sha  { font-family: monospace; font-size: 12px; color: #8c959f; flex-shrink: 0; }
+.git-sha  { font-family: "Iosevka", monospace; font-size: 12px; color: #8c959f; flex-shrink: 0; }
 .git-msg  { color: #24292f; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
 .git-meta { font-size: 12px; color: #8c959f; white-space: nowrap; flex-shrink: 0; }
 
@@ -732,14 +953,14 @@ html[data-theme="dark"] .html-preview-frame { border-color: var(--dark-border); 
 .git-diff-status {
   display: inline-block;
   width: 18px;
-  font-family: monospace;
+  font-family: "Iosevka", monospace;
   font-weight: 600;
 }
 .git-diff-a { color: #cf222e; }
 .git-diff-m { color: #bf8700; }
 .git-diff-d { color: #57606a; }
 .git-diff-r { color: #0969da; }
-.git-diff-path { color: #0969da; text-decoration: none; font-family: monospace; }
+.git-diff-path { color: #0969da; text-decoration: none; font-family: "Iosevka", monospace; }
 .git-diff-path:hover { text-decoration: underline; }
 
 /* --- Infinite scroll sentinel --- */
@@ -792,7 +1013,7 @@ html[data-theme="dark"] .git-ref-head           { background: #2a1a00; color: #f
 html[data-theme="dark"] .git-graph-row--expanded .git-graph-text { border-left-color: var(--dark-border); }
 html[data-theme="dark"] .git-diff-message       { color: var(--dark-text); }
 html[data-theme="dark"] .git-diff-path          { color: var(--dark-link); }
-/* --- Code line numbers --- */
+/* --- Code line numbers & Toolbar --- */
 /* Expand code to its intrinsic width so every .code-line block fills the full
    scroll width — without this, .code-line is constrained to the pre viewport
    width and .code-ln sticky hits the containing-block edge mid-scroll. */
@@ -800,26 +1021,47 @@ pre.has-line-numbers code {
   display: block;
   min-width: max-content;
 }
+pre.has-line-numbers.line-wrapping code {
+  min-width: 0; /* allow shrinking for wrapping */
+}
 .code-line {
-  display: block;
+  display: flex;
+  align-items: stretch;
   min-height: 1.5em;   /* blank lines must occupy vertical space so numbering is consecutive */
 }
 .code-ln {
   position: sticky;
   left: 0;             /* pin to left edge of the pre scroll container on horizontal scroll */
-  display: inline-block;
-  width: 3.5em;        /* wide enough for 4-digit line numbers */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: var(--gutter-width, 3.5em);
   text-align: right;
   padding-right: 0.5em;
   margin-right: 1ch;   /* gap between gutter border and code text */
+  flex-shrink: 0;
   color: #6e7781;
   border-right: 1px solid #d0d7de;
   background-color: rgba(246, 248, 250, 0.85);  /* slightly transparent; matches light-mode pre background */
+  background-image: radial-gradient(circle, rgba(110, 119, 129, 0.3) 1px, transparent 1px);
+  background-position: calc(100% - 0.5em - 0.5ch) 2.25em; /* 1.5em (first line) + 0.75em (center of second line) */
+  background-size: 100% 1.5em;
+  background-repeat: repeat-y;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   user-select: none;
   -webkit-user-select: none;
   vertical-align: top;
+  z-index: 1;
+}
+.code-content {
+  flex: 1;
+  min-width: 0;
+  padding-top: 0.05em; /* align slightly better with line numbers */
+}
+pre.line-wrapping .code-content {
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 /* Extend the gutter background leftward into the pre's padding area so code
    that has scrolled past doesn't leak through when the gutter is semi-transparent. */
@@ -840,15 +1082,75 @@ pre.has-line-numbers code {
 html[data-theme="dark"] .code-ln        { color: #6e7781; border-right-color: var(--dark-border); background-color: rgba(22, 27, 34, 0.85); }
 html[data-theme="dark"] .code-ln::before { background-color: #161b22; }
 
+.code-toolbar {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0.2;
+  transition: opacity 0.2s;
+  z-index: 5;
+}
+pre:hover .code-toolbar {
+  opacity: 1;
+}
+.code-toolbar-btn {
+  background: rgba(246, 248, 250, 0.8);
+  border: 1px solid #d0d7de;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #57606a;
+}
+.code-toolbar-btn:hover {
+  background: #f3f4f6;
+  color: #0969da;
+}
+.code-toolbar-btn.active {
+  background: #0969da;
+  border-color: #0969da;
+  color: white;
+}
+.code-toolbar-btn.active:hover {
+  background: #085cc1;
+  border-color: #085cc1;
+}
+.code-toolbar-btn svg {
+  width: 16px;
+  height: 16px;
+}
+html[data-theme="dark"] .code-toolbar-btn {
+  background: rgba(22, 27, 34, 0.8);
+  border-color: var(--dark-border);
+  color: #8b949e;
+}
+html[data-theme="dark"] .code-toolbar-btn:hover {
+  background: #30363d;
+  color: var(--dark-link);
+}
+html[data-theme="dark"] .code-toolbar-btn.active {
+  background: #1f6feb;
+  border-color: #1f6feb;
+  color: white;
+}
+html[data-theme="dark"] .code-toolbar-btn.active:hover {
+  background: #388bfd;
+  border-color: #388bfd;
+}
+
 /* --- Command Palette (light mode defaults) --- */
 
 #cmd-palette-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  z-index: 10000;
+  z-index: 90000;
   background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px);
 }
 #cmd-palette-overlay.cmd-palette-visible { display: flex; align-items: flex-start; justify-content: center; padding-top: 12vh; }
 
@@ -912,7 +1214,8 @@ html[data-theme="dark"] .code-ln::before { background-color: #161b22; }
 }
 .cmd-palette-item-selected { background: #0969da; color: #ffffff; }
 
-.cmd-palette-item-icon { display: flex; flex-shrink: 0; opacity: 0.75; }
+.cmd-palette-item-icon { display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex-shrink: 0; opacity: 0.75; }
+.cmd-palette-item-icon svg.lucide { width: 100%; height: 100%; }
 .cmd-palette-item-selected .cmd-palette-item-icon { opacity: 1; }
 
 .cmd-palette-item-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -968,7 +1271,7 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   font-size: 13px;
-  z-index: 99998;
+  z-index: 80000;
   opacity: 0;
   transition: opacity 0.2s ease;
   display: flex;
@@ -1060,9 +1363,14 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
 }
 .change-tree-toggle:hover { background: #f3f4f6; }
 .change-tree-dir-icon {
-  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
   line-height: 1;
 }
+.change-tree-dir-icon svg.lucide { width: 100%; height: 100%; }
 
 .change-tree-file {
   display: flex;
@@ -1089,19 +1397,23 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
   text-decoration: underline;
 }
 .change-tree-dismiss-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
   margin-right: 4px;
-  padding: 0 4px;
+  padding: 0;
   background: none;
   border: none;
   cursor: pointer;
   color: #6e7781;
-  font-size: 14px;
-  line-height: 1;
   border-radius: 3px;
   opacity: 0;
   transition: opacity 0.15s, background 0.15s;
 }
+.change-tree-dismiss-btn svg.lucide { width: 14px; height: 14px; }
 .change-tree-file:hover .change-tree-dismiss-btn {
   opacity: 1;
 }
@@ -1109,7 +1421,15 @@ html[data-theme="dark"] .cmd-palette-empty                      { color: var(--d
   background: #f3f4f6;
   color: #cf222e;
 }
-.change-tree-file-icon { font-style: normal; }
+.change-tree-file-icon { 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  font-style: normal; 
+}
+.change-tree-file-icon svg.lucide { width: 100%; height: 100%; }
 
 /* --- Change tracker toast dark mode (auto) --- */
 @media (prefers-color-scheme: dark) {
@@ -1144,3 +1464,32 @@ html[data-theme="dark"] .change-tree-file-link:hover  { background: #21262d; }
 html[data-theme="dark"] .change-tree-dismiss-btn      { color: #8b949e; }
 html[data-theme="dark"] .change-tree-file:hover .change-tree-dismiss-btn { opacity: 1; }
 html[data-theme="dark"] .change-tree-dismiss-btn:hover { background: #21262d; color: #f85149; }
+
+/* --- Footer --- */
+.footer {
+  margin-top: 48px;
+  padding: 32px 0;
+  border-top: 1px solid #d0d7de;
+  color: #656d76;
+  font-size: 12px;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .footer {
+    border-top-color: var(--dark-border);
+    color: var(--dark-muted);
+  }
+}
+
+html[data-theme="dark"] .footer {
+  border-top-color: var(--dark-border);
+  color: var(--dark-muted);
+}
+.footer-text {
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
