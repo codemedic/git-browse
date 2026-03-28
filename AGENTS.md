@@ -16,6 +16,7 @@ markdown and directory browser with deep Git integration.
     - Virtual Git routes (`/_git/*`) for repository state, logs, and diffs
     - Virtual File routes (`/_files/*`) for git-aware search and exploration
     - LiveReload with `.gitignore` filtering
+- **Repository Identification:** To prevent `localStorage` collisions when switching between repositories (especially in Docker where the internal path is fixed at `/var/www`), the server calculates a unique `repoId` (prioritizing `GIT_BROWSE_REPO_ID` from the environment). This ID namespaces all client-side cache and state.
 - **Templates (`src/templates/`):** Handlebars templates for the UI chrome.
 - **Client Scripts (`src/*.js`):** Vanilla JS scripts served to the browser. These
   provide the interactive features like the command palette, file tree, and git
@@ -48,11 +49,16 @@ Run tests with: `npm test`
 The primary integration test is `test/server.test.js`, which uses `supertest`
 to verify server routes and rendering logic.
 
-## 📦 Docker
+## 📦 Docker & Runtime
+
+Containerized execution is the **primary and most common runtime environment** for GitBrowse. It is typically launched via `start.sh`, which manages Docker Compose lifecycle.
 
 The `Dockerfile` builds a lightweight image that:
 1. Installs Node.js dependencies
 2. Copies the source code
 3. Runs `src/server.js` as the entry point
 
-The server is configured to serve the `/var/www` directory by default.
+**Key Runtime Assumptions:**
+- **Standard Path:** The server is configured to serve the `/var/www` directory by default.
+- **Identity:** Since multiple repositories might be served from the same `/var/www` path across different container instances, the `GIT_BROWSE_REPO_ID` environment variable is critical for namespacing persistent client state.
+- **Port Mapping:** The host port is dynamically assigned by `start.sh` to avoid conflicts.
