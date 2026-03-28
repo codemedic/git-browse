@@ -258,7 +258,7 @@ const renderWithLayout = (templateName, data, baseDir) => {
   })
 }
 
-const repoId = path.basename(dir) || 'root'
+const repoId = gitExec(['rev-list', '--max-parents=0', 'HEAD']).slice(0, 12) || path.basename(dir) || 'root'
 
 // Error Page helper
 const sendError = (req, res, code, filePath, err, decodedUrl) => {
