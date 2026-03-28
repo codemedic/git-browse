@@ -97,8 +97,15 @@ main() {
     local url="http://localhost:8080${sub_path}/"
     log_debug "Initial URL to open: $url"
 
-    # Deterministic project name per repo — avoids container conflicts across instances
-    project="git-browse-$(get_md5_short "$server_root")"
+    # Deterministic project name per repo — avoids container conflicts across instances.
+    # Align with src/server.js: use root commit hash as the primary differentiator.
+    local git_hash
+    git_hash=$(git -C "$server_root" rev-list --max-parents=0 HEAD 2>/dev/null | cut -c1-8 || echo "")
+    if [[ -n "$git_hash" ]]; then
+        project="git-browse-$git_hash"
+    else
+        project="git-browse-$(get_md5_short "$server_root")"
+    fi
 
     local -a compose
     compose=(docker compose -p "$project" -f "$compose_path")
