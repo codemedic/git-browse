@@ -488,7 +488,14 @@ app.get('*', async (req, res, next) => {
   try {
     stat = fs.statSync(filePath)
   } catch (e) {
-    if (decodedUrl === '/favicon.ico') return res.status(404).end()
+    if (decodedUrl === '/favicon.ico') {
+      const logoPath = path.join(__dirname, 'assets/favicon-dark.svg')
+      if (fs.existsSync(logoPath)) {
+        res.setHeader('Content-Type', 'image/svg+xml')
+        return res.sendFile(logoPath)
+      }
+      return res.status(404).end()
+    }
     return sendError(req, res, 404, filePath, e, decodedUrl)
   }
 

@@ -3,6 +3,8 @@
 <head>
   <script src="__ASSETS__lucide.min.js"></script>
   <script src="__ASSETS__icons.js"></script>
+  <link rel="icon" type="image/svg+xml" href="__ASSETS__assets/favicon-light.svg" media="(prefers-color-scheme: light)">
+  <link rel="icon" type="image/svg+xml" href="__ASSETS__assets/favicon-dark.svg" media="(prefers-color-scheme: dark)">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{title}}</title>
@@ -18,7 +20,7 @@
 </head>
 <body class="directory-view">
   <div class="breadcrumbs" style="display:none">
-    {{#each breadcrumbs}}<a href="{{href}}" {{#if isRoot}}class="breadcrumbs-root"{{/if}}>{{#if isRoot}}<i data-lucide="home"></i>{{else}}{{text}}{{/if}}</a>{{/each}}
+    {{#each breadcrumbs}}<a href="{{href}}" {{#if isRoot}}class="breadcrumbs-root"{{/if}}>{{#if isRoot}}<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 25 C30 20 45 22 45 25 V85 C30 83 15 85 15 85 Z" stroke-opacity="0.4" /><path d="M85 25 C70 20 55 22 55 25 V85 C70 83 85 85 85 85 Z" stroke-opacity="0.4" /><path d="M50 25 V85" /><path d="M50 70 C50 60 62 60 62 48 V35" /><circle cx="50" cy="35" r="3" fill="currentColor" /><circle cx="50" cy="70" r="3" fill="currentColor" /><circle cx="62" cy="35" r="3" fill="currentColor" /><path d="M20 35 V75" stroke-opacity="0.2" /><path d="M20 38 H38" /><path d="M20 53 H28 V63 H38" /><path d="M20 73 H35" /><path d="M62 38 H78" stroke-width="5" /><path d="M62 53 H75" /><path d="M62 63 H70" /><path d="M62 73 H78" /></svg>{{else}}{{text}}{{/if}}</a>{{/each}}
   </div>
   <div id="content" class="markdown-body">
     {{{content}}}

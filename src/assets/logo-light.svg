@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="512" height="512">
+  <defs>
+    <linearGradient id="backGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#CBD5E1" />
+      <stop offset="100%" stop-color="#94A3B8" />
+    </linearGradient>
+    <linearGradient id="frontGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#F1F5F9" />
+    </linearGradient>
+    <linearGradient id="revealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8957E5" />
+      <stop offset="100%" stop-color="#C084FC" />
+    </linearGradient>
+    <mask id="cutout-mask">
+      <rect x="0" y="0" width="256" height="256" fill="white" />
+      <g stroke="black" fill="black" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M 104 124 L 104 188" stroke-width="12.8" />
+        <path d="M 104 164 C 104 134, 152 148, 152 124" stroke-width="12.8" fill="none" />
+        <circle cx="104" cy="124" r="14" />
+        <circle cx="104" cy="188" r="14" />
+        <circle cx="152" cy="124" r="14" />
+      </g>
+    </mask>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="rgba(100, 116, 139, 0.35)" />
+    </filter>
+  </defs>
+  <path d="M 32 64 A 16 16 0 0 1 48 48 H 92 L 112 68 H 208 A 16 16 0 0 1 224 84 V 208 A 16 16 0 0 1 208 224 H 48 A 16 16 0 0 1 32 208 Z" fill="url(#backGrad)" stroke="rgba(0, 0, 0, 0.1)" stroke-width="2" />
+  <g opacity="0.95">
+    <rect x="48" y="60" width="152" height="60" rx="4" fill="#FFFFFF" stroke="rgba(0, 0, 0, 0.1)" stroke-width="1" />
+    <rect x="64" y="72" width="40" height="4" rx="2" fill="#94A3B8" />
+    <rect x="64" y="84" width="80" height="4" rx="2" fill="#94A3B8" />
+  </g>
+  <path d="M 32 112 A 16 16 0 0 1 48 96 H 208 A 16 16 0 0 1 224 112 V 208 A 16 16 0 0 1 208 224 H 48 A 16 16 0 0 1 32 208 Z" fill="url(#revealGrad)" />
+  <path d="M 32 112 A 16 16 0 0 1 48 96 H 208 A 16 16 0 0 1 224 112 V 208 A 16 16 0 0 1 208 224 H 48 A 16 16 0 0 1 32 208 Z" fill="url(#frontGrad)" mask="url(#cutout-mask)" filter="url(#shadow)" />
+  <path d="M 32 112 A 16 16 0 0 1 48 96 H 208 A 16 16 0 0 1 224 112 V 208 A 16 16 0 0 1 208 224 H 48 A 16 16 0 0 1 32 208 Z" fill="none" stroke="rgba(255, 255, 255, 0.9)" stroke-width="1.5" mask="url(#cutout-mask)" />
+</svg>

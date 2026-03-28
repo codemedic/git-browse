@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="favBack" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#CBD5E1" />
+      <stop offset="100%" stop-color="#94A3B8" />
+    </linearGradient>
+    <linearGradient id="favFront" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#F1F5F9" />
+    </linearGradient>
+    <linearGradient id="favReveal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8957E5" />
+      <stop offset="100%" stop-color="#C084FC" />
+    </linearGradient>
+    <mask id="favMask">
+      <rect width="64" height="64" fill="white" />
+      <g stroke="black" fill="black" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M 24 30 L 24 48" stroke-width="4.5" />
+        <path d="M 24 39 C 24 30, 40 36, 40 30" stroke-width="4.5" fill="none" />
+        <circle cx="24" cy="30" r="4.5" />
+        <circle cx="24" cy="48" r="4.5" />
+        <circle cx="40" cy="30" r="4.5" />
+      </g>
+    </mask>
+  </defs>
+  <path d="M 8 16 A 4 4 0 0 1 12 12 H 26 L 32 18 H 52 A 4 4 0 0 1 56 22 V 52 A 4 4 0 0 1 52 56 H 12 A 4 4 0 0 1 8 52 Z" fill="url(#favBack)" />
+  <path d="M 8 26 A 4 4 0 0 1 12 22 H 52 A 4 4 0 0 1 56 26 V 52 A 4 4 0 0 1 52 56 H 12 A 4 4 0 0 1 8 52 Z" fill="url(#favReveal)" />
+  <path d="M 8 26 A 4 4 0 0 1 12 22 H 52 A 4 4 0 0 1 56 26 V 52 A 4 4 0 0 1 52 56 H 12 A 4 4 0 0 1 8 52 Z" fill="url(#favFront)" mask="url(#favMask)" />
+</svg>
