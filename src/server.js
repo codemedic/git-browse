@@ -27,6 +27,7 @@ const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
 const mime = require('mime-types')
 const ignore = require('ignore')
+const crypto = require('crypto')
 
 // ---------------------------------------------------------------------------
 // CLI Configuration
@@ -258,7 +259,9 @@ const renderWithLayout = (templateName, data, baseDir) => {
   })
 }
 
-const repoId = gitExec(['rev-list', '--max-parents=0', 'HEAD']).slice(0, 12) || path.basename(dir) || 'root'
+const repoId = process.env.GIT_BROWSE_REPO_ID || 
+               gitExec(['rev-list', '--max-parents=0', 'HEAD']).slice(0, 12) || 
+               crypto.createHash('md5').update(dir).digest('hex').slice(0, 12)
 
 // Error Page helper
 const sendError = (req, res, code, filePath, err, decodedUrl) => {

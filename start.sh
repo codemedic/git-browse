@@ -101,11 +101,13 @@ main() {
     # Align with src/server.js: use root commit hash as the primary differentiator.
     local git_hash
     git_hash=$(git -C "$server_root" rev-list --max-parents=0 HEAD 2>/dev/null | cut -c1-8 || echo "")
+    local repo_id
     if [[ -n "$git_hash" ]]; then
-        project="git-browse-$git_hash"
+        repo_id="$git_hash"
     else
-        project="git-browse-$(get_md5_short "$server_root")"
+        repo_id="$(get_md5_short "$server_root")"
     fi
+    project="git-browse-$repo_id"
 
     local -a compose
     compose=(docker compose -p "$project" -f "$compose_path")
@@ -133,7 +135,7 @@ main() {
         livereload_port=$((livereload_port + 1))
     done
 
-    export REPO_PATH="$server_root" PORT="$port" LIVERELOAD_PORT="$livereload_port"
+    export REPO_PATH="$server_root" PORT="$port" LIVERELOAD_PORT="$livereload_port" GIT_BROWSE_REPO_ID="$repo_id"
 
     echo "Serving: $server_root"
     echo "Open:    $url"

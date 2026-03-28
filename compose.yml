@@ -6,5 +6,7 @@ services:
       - "${LIVERELOAD_PORT:-35729}:${LIVERELOAD_PORT:-35729}"
     volumes:
       - ${REPO_PATH:-.}:/var/www:ro
+    environment:
+      - GIT_BROWSE_REPO_ID=${GIT_BROWSE_REPO_ID:-}
     restart: unless-stopped
     stop_grace_period: 1s
