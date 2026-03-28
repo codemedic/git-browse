@@ -90,12 +90,117 @@
     });
 
     // -------------------------------------------------------------------------
+    // Toolbar burger button (only shows when sidebar hidden)
+    // -------------------------------------------------------------------------
+    var burgerBtn = document.createElement('button');
+    burgerBtn.id = 'toolbar-burger-btn';
+    burgerBtn.className = 'toolbar-btn toolbar-icon-btn';
+    burgerBtn.title = 'Show file tree';
+    burgerBtn.innerHTML = '<span class="toolbar-btn-icon"><i data-lucide="menu"></i></span>';
+    burgerBtn.addEventListener('click', function () {
+      var ftOpenBtn = document.getElementById('filetree-open-btn');
+      if (ftOpenBtn) ftOpenBtn.click();
+    });
+
+    // -------------------------------------------------------------------------
+    // Breadcrumbs integration
+    // -------------------------------------------------------------------------
+    var breadcrumbsContainer = document.createElement('div');
+    breadcrumbsContainer.id = 'toolbar-breadcrumbs';
+    
+    function updateBreadcrumbs() {
+      breadcrumbsContainer.innerHTML = '';
+      var source = document.querySelector('.breadcrumbs');
+      if (!source) return;
+
+      var crumbs = Array.from(source.querySelectorAll('a'));
+      if (crumbs.length === 0) return;
+
+      var MAX_VISIBLE = 10;
+      var displayedCrumbs = crumbs;
+      var hasEllipsis = false;
+
+      if (crumbs.length > MAX_VISIBLE) {
+        var root = crumbs[0];
+        var tail = crumbs.slice(-4);
+        displayedCrumbs = [root];
+        hasEllipsis = true;
+      }
+
+      displayedCrumbs.forEach(function (crumb, idx) {
+        var clone = crumb.cloneNode(true);
+        breadcrumbsContainer.appendChild(clone);
+        
+        if (hasEllipsis && idx === 0) {
+          var ellipsis = document.createElement('span');
+          ellipsis.className = 'breadcrumb-ellipsis';
+          ellipsis.textContent = '\u2026';
+          breadcrumbsContainer.appendChild(ellipsis);
+          tail.forEach(function(t) {
+            breadcrumbsContainer.appendChild(t.cloneNode(true));
+          });
+        }
+      });
+      
+      // Remove original breadcrumbs to avoid duplication
+      source.style.display = 'none';
+    }
+
+    // -------------------------------------------------------------------------
+    // Copy button
+    // -------------------------------------------------------------------------
+    var copyBtn = document.createElement('button');
+    copyBtn.id = 'toolbar-copy-btn';
+    copyBtn.className = 'toolbar-btn toolbar-icon-btn';
+    copyBtn.title = 'Copy path to clipboard';
+    copyBtn.innerHTML = '<span class="toolbar-btn-icon"><i data-lucide="copy"></i></span>';
+    
+    // Copy logic (simplified version of breadcrumb-actions.js)
+    copyBtn.addEventListener('click', function () {
+      var path = decodeURIComponent(window.location.pathname);
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(path);
+      } else {
+        var textArea = document.createElement("textarea");
+        textArea.value = path;
+        textArea.style.position = "fixed";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try { document.execCommand('copy'); } catch (err) {}
+        document.body.removeChild(textArea);
+      }
+
+      var iconSpan = copyBtn.querySelector('.toolbar-btn-icon');
+      var originalHTML = iconSpan.innerHTML;
+      iconSpan.innerHTML = '<i data-lucide="check"></i>';
+      copyBtn.classList.add('toolbar-btn-active');
+      if (window.__gitBrowseIcons) window.__gitBrowseIcons.create(iconSpan);
+
+      setTimeout(function () {
+        iconSpan.innerHTML = originalHTML;
+        copyBtn.classList.remove('toolbar-btn-active');
+        if (window.__gitBrowseIcons) window.__gitBrowseIcons.create(iconSpan);
+      }, 2000);
+    });
+
+    // -------------------------------------------------------------------------
     // Assemble and mount
     // -------------------------------------------------------------------------
-    toolbar.appendChild(themeBtn);
-    toolbar.appendChild(gitBtn);
-    toolbar.appendChild(cmdBtn);
+    toolbar.appendChild(burgerBtn);
+    toolbar.appendChild(breadcrumbsContainer);
+    toolbar.appendChild(copyBtn);
+    
+    var actionsContainer = document.createElement('div');
+    actionsContainer.className = 'toolbar-actions';
+    actionsContainer.appendChild(themeBtn);
+    actionsContainer.appendChild(gitBtn);
+    actionsContainer.appendChild(cmdBtn);
+    
+    toolbar.appendChild(actionsContainer);
     document.body.appendChild(toolbar);
+
+    updateBreadcrumbs();
 
     // Initialize icons for the entire toolbar
     if (window.__gitBrowseIcons) window.__gitBrowseIcons.create(toolbar);

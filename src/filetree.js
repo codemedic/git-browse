@@ -32,7 +32,11 @@
     if (!_bare) {
       try {
         var s = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
-        if (!s.hidden) document.documentElement.setAttribute('data-ft-open', '');
+        if (!s.hidden) {
+          document.documentElement.setAttribute('data-ft-open', '');
+        } else {
+          document.documentElement.setAttribute('data-burger-visible', '');
+        }
       } catch (e) {}
     }
   }());
@@ -282,22 +286,28 @@
       sessionStorage.setItem(SCROLL_KEY, sidebar.scrollTop);
     });
 
-    // Toggle button — visible only when sidebar is hidden
+    // Toggle button — hidden (we use the toolbar burger instead, but keep this for logic)
     var toggleBtn = document.createElement('button');
     toggleBtn.id = 'filetree-open-btn';
     toggleBtn.title = 'Show file tree';
     toggleBtn.textContent = '☰';
-    if (!s.hidden) toggleBtn.style.display = 'none';
+    toggleBtn.style.display = 'none';
     document.body.appendChild(toggleBtn);
 
     closeBtn.addEventListener('click', function () {
-      sidebar.classList.add('ft-hidden');
-      toggleBtn.style.display = '';
-      document.body.classList.remove('ft-open');
-      document.documentElement.removeAttribute('data-ft-open');
-      var s = getState();
-      s.hidden = true;
-      saveState(s);
+      // 1. Show the burger icon (triggers CSS transition) while sidebar is still open
+      document.documentElement.setAttribute('data-burger-visible', '');
+      
+      // 2. Wait for user to register the burger appearance (600ms)
+      setTimeout(function() {
+        // 3. Now move everything else
+        document.documentElement.removeAttribute('data-ft-open');
+        sidebar.classList.add('ft-hidden');
+        document.body.classList.remove('ft-open');
+        var s = getState();
+        s.hidden = true;
+        saveState(s);
+      }, 600);
     });
 
     toggleBtn.addEventListener('click', function () {
@@ -305,6 +315,7 @@
       toggleBtn.style.display = 'none';
       document.body.classList.add('ft-open');
       document.documentElement.setAttribute('data-ft-open', '');
+      document.documentElement.removeAttribute('data-burger-visible');
       var s = getState();
       delete s.hidden;
       saveState(s);
