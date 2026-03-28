@@ -61,4 +61,14 @@ describe('Server Integration Tests', () => {
     assert.strictEqual(res.statusCode, 200)
     assert.ok(res.text.includes('git-browse'))
   })
+
+  test('GET /test/frontmatter.md renders frontmatter correctly', async () => {
+    const res = await request(app).get('/test/frontmatter.md')
+    assert.strictEqual(res.statusCode, 200)
+    assert.ok(res.text.includes('markdown-frontmatter'))
+    // Delimiters should be present in the HTML (escaped if rendered via highlight.js)
+    assert.ok(res.text.includes('---'))
+    assert.ok(res.text.includes('title: Frontmatter Test'))
+    assert.ok(res.text.includes('status: active'))
+  })
 })

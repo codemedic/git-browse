@@ -8,9 +8,9 @@
 
   function addLineNumbers(block) {
     var pre = block.parentElement;
-    var html = block.innerHTML;
-    // Strip trailing newline added by fenced code block rendering
-    if (html.slice(-1) === '\n') html = html.slice(0, -1);
+    // Strip trailing whitespace even if it's embedded inside closing HTML tags
+    // (highlight.js sometimes wraps the final \n inside a span)
+    var html = block.innerHTML.replace(/\s+((<\/[^>]*>)*)$/, '$1');
     var res = splitIntoLines(html);
     block.innerHTML = res.html;
     pre.classList.add('has-line-numbers');

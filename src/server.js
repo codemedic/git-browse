@@ -516,9 +516,9 @@ app.get('*', async (req, res, next) => {
 
       if (isMarkdown) {
         const rawSource = await getFile(filePath)
-        const fmMatch = rawSource.match(/^---\r?\n([\s\S]*?)\n---\r?\n/)
-        const content = fmMatch ? rawSource.slice(fmMatch[0].length) : rawSource
-        const fmYaml = fmMatch ? '```yaml\n' + fmMatch[1] + '\n```' : ''
+        const fmMatch = rawSource.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/)
+        const content = fmMatch ? rawSource.slice(fmMatch[0].length).replace(/^\r?\n?/, '') : rawSource
+        const fmYaml = fmMatch ? '```yaml\n---\n' + fmMatch[1].trim() + '\n---\n```' : ''
 
         const [fmHtml, renderedBody] = await Promise.all([
           fmYaml ? markdownToHTML(fmYaml) : Promise.resolve(''),
