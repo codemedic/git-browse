@@ -326,12 +326,10 @@
       });
     }
 
-    _palette.input.value = '> ';
+    _palette.input.value = '';
     _palette.overlay.classList.add('cmd-palette-visible');
     _palette.input.focus();
-    // Position cursor at end of pre-filled '> '
-    _palette.input.setSelectionRange(2, 2);
-    refreshResults('> ');
+    refreshResults('');
   }
 
   function closePalette() {
