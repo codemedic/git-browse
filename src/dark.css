@@ -126,6 +126,67 @@ html[data-theme="dark"] .mermaid-error-src { background: #161b22; border-color: 
 html[data-theme="dark"] .markdown-body img { background-color: transparent; }
 .markdown-body hr { height: 0.25em; padding: 0; margin: 24px 0; background-color: #d0d7de; border: 0; }
 
+/* --- Breadcrumbs and links --- */
+a {
+  color: #0969da;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumbs {
+  margin-bottom: 24px;
+  font-size: 1.1rem;
+  font-family: "Iosevka", ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+  font-weight: 600;
+  display: flex;
+  gap: 4px;
+}
+.breadcrumbs a {
+  color: #0969da;
+  text-decoration: none;
+}
+.breadcrumbs a:hover {
+  text-decoration: underline;
+}
+.breadcrumbs-root {
+  display: flex;
+  align-items: center;
+  margin-right: 4px;
+}
+.breadcrumbs-root svg {
+  width: 18px;
+  height: 18px;
+}
+#breadcrumbs-copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6e7781;
+  opacity: 0.3;
+  transition: opacity 0.2s, color 0.2s;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#breadcrumbs-copy-btn:hover {
+  opacity: 1;
+  color: #0969da;
+}
+#breadcrumbs-copy-btn.copied {
+  opacity: 1;
+  color: #1a7f37;
+}
+#breadcrumbs-copy-btn svg {
+  width: 16px;
+  height: 16px;
+}
+.markdown-body a {
+  color: #0969da;
+}
+
 /* --- Syntax highlighting: GitHub Light theme --- */
 .hljs-doctag,
 .hljs-keyword,
@@ -211,6 +272,12 @@ html[data-theme="dark"] .markdown-body img { background-color: transparent; }
   }
   html:not([data-theme="light"]) .markdown-body              { color: var(--dark-text); background-color: var(--dark-bg); }
   html:not([data-theme="light"]) .markdown-body a            { color: var(--dark-link); }
+  html:not([data-theme="light"]) a                           { color: var(--dark-link); }
+  html:not([data-theme="light"]) .breadcrumbs a              { color: var(--dark-link); }
+  html:not([data-theme="light"]) .breadcrumbs a svg.lucide   { stroke: var(--dark-link); }
+  html:not([data-theme="light"]) #breadcrumbs-copy-btn       { color: var(--dark-muted); }
+  html:not([data-theme="light"]) #breadcrumbs-copy-btn:hover { color: var(--dark-link); }
+  html:not([data-theme="light"]) #breadcrumbs-copy-btn.copied { color: #3fb950; }
   html:not([data-theme="light"]) .markdown-body h1,
   html:not([data-theme="light"]) .markdown-body h2           { border-bottom-color: var(--dark-border-sub); }
   html:not([data-theme="light"]) .markdown-body h6           { color: var(--dark-muted); }
@@ -281,6 +348,12 @@ html[data-theme="dark"] body                        { background-color: var(--da
 }
 html[data-theme="dark"] .markdown-body              { color: var(--dark-text); background-color: var(--dark-bg); }
 html[data-theme="dark"] .markdown-body a            { color: var(--dark-link); }
+html[data-theme="dark"] a                           { color: var(--dark-link); }
+html[data-theme="dark"] .breadcrumbs a              { color: var(--dark-link); }
+html[data-theme="dark"] .breadcrumbs a svg.lucide   { stroke: var(--dark-link); }
+html[data-theme="dark"] #breadcrumbs-copy-btn       { color: var(--dark-muted); }
+html[data-theme="dark"] #breadcrumbs-copy-btn:hover { color: var(--dark-link); }
+html[data-theme="dark"] #breadcrumbs-copy-btn.copied { color: #3fb950; }
 html[data-theme="dark"] .markdown-body h1,
 html[data-theme="dark"] .markdown-body h2           { border-bottom-color: var(--dark-border-sub); }
 html[data-theme="dark"] .markdown-body h6           { color: var(--dark-muted); }

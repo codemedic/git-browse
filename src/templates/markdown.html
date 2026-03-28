@@ -17,8 +17,13 @@
   <script src="__ASSETS__picture-theme.js"></script>
   <script src="__ASSETS__command-palette.js"></script>
   <script src="__ASSETS__change-tracker.js"></script>
+  <script src="__ASSETS__breadcrumb-actions.js"></script>
 </head>
 <body class="markdown-view">
+  <div class="breadcrumbs">
+    {{#each breadcrumbs}}<a href="{{href}}" {{#if isRoot}}class="breadcrumbs-root"{{/if}}>{{#if isRoot}}<i data-lucide="home"></i>{{else}}{{text}}{{/if}}</a>{{/each}}
+    <button id="breadcrumbs-copy-btn" title="Copy path to clipboard"><i data-lucide="copy"></i></button>
+  </div>
   <div id="content" class="markdown-body">
     {{{content}}}
   </div>
