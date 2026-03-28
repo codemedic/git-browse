@@ -135,7 +135,9 @@ main() {
         livereload_port=$((livereload_port + 1))
     done
 
-    export REPO_PATH="$server_root" PORT="$port" LIVERELOAD_PORT="$livereload_port" GIT_BROWSE_REPO_ID="$repo_id"
+    local repo_name
+    repo_name="$(basename "$server_root")"
+    export REPO_PATH="$server_root" PORT="$port" LIVERELOAD_PORT="$livereload_port" GIT_BROWSE_REPO_ID="$repo_id" GIT_BROWSE_REPO_NAME="$repo_name"
 
     echo "Serving: $server_root"
     echo "Open:    $url"

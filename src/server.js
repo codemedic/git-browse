@@ -246,7 +246,9 @@ const implantHandlers = {
 
 const renderWithLayout = (templateName, data, baseDir) => {
   const templateUrl = path.join(__dirname, 'templates', templateName)
-  return baseTemplate(templateUrl, data).then(html => {
+  const fullTitle = (data.title && data.title !== '/') ? repoName + ' - ' + data.title.replace(/^\//, '') : repoName
+  const fullData = { ...data, title: fullTitle }
+  return baseTemplate(templateUrl, fullData).then(html => {
     const opts = deepmerge(implantOpts, { baseDir })
     // Replace __ASSETS__ in HTML before implant
     const replaced = html.replace(/__ASSETS__/g, '/_static/')
@@ -263,12 +265,15 @@ const repoId = process.env.GIT_BROWSE_REPO_ID ||
                gitExec(['rev-list', '--max-parents=0', 'HEAD']).slice(0, 12) || 
                crypto.createHash('md5').update(dir).digest('hex').slice(0, 12)
 
+const repoName = process.env.GIT_BROWSE_REPO_NAME || path.basename(dir)
+
 // Error Page helper
 const sendError = (req, res, code, filePath, err, decodedUrl) => {
   errormsg(code, filePath, err)
   const data = {
     code,
     repoId,
+    title: (code === 404 ? 'File Not Found' : 'Error ' + code),
     fileName: path.relative(dir, filePath),
     filePath,
     errorMsg: err.message,
@@ -518,7 +523,7 @@ app.get('*', async (req, res, next) => {
         repoId,
         dirname: path.dirname(decodedUrl),
         content: useReadme ? '<div class="readme-body markdown-body">' + readmeHtml + '</div>' : dirToHtml(filePath, decodedUrl),
-        title: path.basename(filePath) || path.basename(dir),
+        title: decodedUrl,
         breadcrumbs: createBreadcrumbs(decodedUrl, true)
       }
       const output = await renderWithLayout(template, data, filePath)
@@ -555,7 +560,7 @@ app.get('*', async (req, res, next) => {
           <div class="toggle-panel" data-panel="preview">${renderedHtml}</div>
           <div class="toggle-panel" data-panel="source" style="display:none">${srcHtml}</div>
         `
-        const data = { repoId, title: path.basename(filePath), content: combined, breadcrumbs: createBreadcrumbs(decodedUrl, false) }
+        const data = { repoId, title: decodedUrl, content: combined, breadcrumbs: createBreadcrumbs(decodedUrl, false) }
         const output = await renderWithLayout('markdown.html', data, path.dirname(filePath))
         res.send(output)
       } else if (isHtml) {
@@ -579,7 +584,7 @@ app.get('*', async (req, res, next) => {
           </div>
           <div class="toggle-panel" data-panel="source" style="display:none">${srcHtml}</div>
         `
-        const data = { repoId, title: path.basename(filePath), content: combined, breadcrumbs: createBreadcrumbs(decodedUrl, false) }
+        const data = { repoId, title: decodedUrl, content: combined, breadcrumbs: createBreadcrumbs(decodedUrl, false) }
         const output = await renderWithLayout('markdown.html', data, path.dirname(filePath))
         res.send(output)
       } else {
@@ -592,7 +597,7 @@ app.get('*', async (req, res, next) => {
           const content = await getFile(filePath)
           const lang = ext ? ext.slice(1) : path.basename(filePath).toLowerCase()
           const html = await markdownToHTML('```' + lang + '\n' + content + '\n```')
-          const data = { repoId, title: path.basename(filePath), content: html, breadcrumbs: createBreadcrumbs(decodedUrl, false) }
+          const data = { repoId, title: decodedUrl, content: html, breadcrumbs: createBreadcrumbs(decodedUrl, false) }
           const output = await renderWithLayout('markdown.html', data, path.dirname(filePath))
           res.send(output)
         } else {

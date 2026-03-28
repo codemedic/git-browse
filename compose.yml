@@ -8,5 +8,6 @@ services:
       - ${REPO_PATH:-.}:/var/www:ro
     environment:
       - GIT_BROWSE_REPO_ID=${GIT_BROWSE_REPO_ID:-}
+      - GIT_BROWSE_REPO_NAME=${GIT_BROWSE_REPO_NAME:-}
     restart: unless-stopped
     stop_grace_period: 1s

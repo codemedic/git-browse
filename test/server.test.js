@@ -71,4 +71,21 @@ describe('Server Integration Tests', () => {
     assert.ok(res.text.includes('title: Frontmatter Test'))
     assert.ok(res.text.includes('status: active'))
   })
+
+  test('GET / verifies repo name prefix in title', async () => {
+    // When running tests, dir is usually the current project root.
+    const expectedRepoName = path.basename(process.cwd())
+    const res = await request(app).get('/')
+    assert.strictEqual(res.statusCode, 200)
+    // The title should be prefixed with the repo name (basename of CWD in tests)
+    assert.ok(res.text.includes(`<title>${expectedRepoName}</title>`), `Title should be "${expectedRepoName}" for root, got text containing title tag: ${res.text.slice(0, 500)}`)
+  })
+
+  test('GET /README.md verifies full path in title', async () => {
+    const expectedRepoName = path.basename(process.cwd())
+    const res = await request(app).get('/README.md')
+    assert.strictEqual(res.statusCode, 200)
+    // Should be {repoName} - README.md
+    assert.ok(res.text.includes(`<title>${expectedRepoName} - README.md</title>`))
+  })
 })
