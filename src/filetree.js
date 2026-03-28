@@ -8,10 +8,11 @@
   var _bare = window.location.search.indexOf('bare') !== -1;
   if (_bare) document.documentElement.setAttribute('data-bare', '');
 
-  var STATE_KEY  = 'git-browse-filetree-v1';
-  var CACHE_KEY  = 'git-browse-filetree-cache-v2'; // v2: git-aware JSON listing
-  var SCROLL_KEY = 'git-browse-filetree-scroll-v1';
-  var WIDTH_KEY  = 'git-browse-filetree-width-v1';
+  var repoId = window.__repoId || 'root';
+  var STATE_KEY  = 'git-browse-filetree-v1-' + repoId;
+  var CACHE_KEY  = 'git-browse-filetree-cache-v2-' + repoId;
+  var SCROLL_KEY = 'git-browse-filetree-scroll-v1-' + repoId;
+  var WIDTH_KEY  = 'git-browse-filetree-width-v1-' + repoId;
 
   var MIN_WIDTH = 160;
   var MAX_WIDTH = 600;
