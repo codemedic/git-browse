@@ -132,4 +132,24 @@ describe('MCPServer Unit Tests', () => {
       if (fs.existsSync(testFile)) fs.unlinkSync(testFile);
     }
   })
+
+  test('Diff rejection format', async () => {
+    const diffPromise = mcp.server.receive({
+      jsonrpc: '2.0',
+      id: 4,
+      method: 'tools/call',
+      params: {
+        name: 'openDiff',
+        arguments: { path: 'reject-test.js', diff: '@@ -1 +1 @@\n-old\n+new' }
+      }
+    });
+
+    await new Promise(r => setTimeout(r, 50));
+    const [id] = mcp.pendingDiffs.keys();
+    mcp.respondToDiff(id, 'reject');
+
+    const response = await diffPromise;
+    assert.ok(response.result.error, 'Should return an error object on rejection');
+    assert.strictEqual(response.result.error.message, 'REJECTED');
+  })
 })

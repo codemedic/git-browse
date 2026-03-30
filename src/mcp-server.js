@@ -176,7 +176,12 @@ class MCPServer extends EventEmitter {
 
     this.toolHandlers.closeAllDiffTabs = () => {
       for (const [id, diff] of this.pendingDiffs) {
-        diff.resolve({ status: 'DIFF_REJECTED' });
+        diff.resolve({
+          error: {
+            code: 0,
+            message: 'REJECTED'
+          }
+        });
       }
       this.pendingDiffs.clear();
       this.emit('diff:clearAll');
@@ -310,8 +315,19 @@ class MCPServer extends EventEmitter {
     const diff = this.pendingDiffs.get(id);
     if (diff) {
       console.log(`[MCP] Found pending diff for ${diff.filePath}. Resolving...`);
-      const result = action === 'approve' ? { status: 'FILE_SAVED' } : { status: 'DIFF_REJECTED' };
-      diff.resolve(result);
+      
+      if (action === 'approve') {
+        diff.resolve({ status: 'FILE_SAVED' });
+      } else {
+        // Claude Code expects an error result for hard rejection
+        diff.resolve({
+          error: {
+            code: 0,
+            message: 'REJECTED'
+          }
+        });
+      }
+      
       this.emit('diff:resolved', { id, action });
       return true;
     }
