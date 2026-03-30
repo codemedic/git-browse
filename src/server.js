@@ -28,6 +28,19 @@ const { hideBin } = require('yargs/helpers')
 const mime = require('mime-types')
 const ignore = require('ignore')
 const crypto = require('crypto')
+const MCPServer = require('./mcp-server')
+
+// ---------------------------------------------------------------------------
+// Error Handling
+// ---------------------------------------------------------------------------
+
+process.on('uncaughtException', (err) => {
+  console.error('CRITICAL: Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('CRITICAL: Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
 // ---------------------------------------------------------------------------
 // CLI Configuration
@@ -484,6 +497,129 @@ app.use('/_files', (req, res, next) => {
   next()
 })
 
+// ---------------------------------------------------------------------------
+// Agent Integration
+// ---------------------------------------------------------------------------
+
+let mcpServerInstance;
+
+app.get('/_agent/events', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  const sendEvent = (event, data) => {
+    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  };
+
+  if (!mcpServerInstance) {
+    sendEvent('error', { message: 'Agent integration not initialized' });
+    return;
+  }
+
+  // Send current state on connect
+  sendEvent('init', {
+    connected: !!mcpServerInstance.connectedAgent,
+    agentName: mcpServerInstance.connectedAgent ? mcpServerInstance.connectedAgent.name : null,
+    pendingDiffs: Array.from(mcpServerInstance.pendingDiffs.entries()).map(([id, d]) => ({
+      id,
+      path: d.filePath,
+      params: d.params,
+      diffContent: d.diffContent
+    }))
+  });
+
+  const onDiffNew = (data) => sendEvent('diff:new', data);
+  const onDiffResolved = (data) => sendEvent('diff:resolved', data);
+  const onAgentConnected = (data) => sendEvent('agent:connected', data);
+  const onAgentDisconnected = () => sendEvent('agent:disconnected', {});
+
+  mcpServerInstance.on('diff:new', onDiffNew);
+  mcpServerInstance.on('diff:resolved', onDiffResolved);
+  mcpServerInstance.on('agent:connected', onAgentConnected);
+  mcpServerInstance.on('agent:disconnected', onAgentDisconnected);
+  mcpServerInstance.on('file:open', (data) => sendEvent('file:open', data));
+
+  req.on('close', () => {
+    mcpServerInstance.off('diff:new', onDiffNew);
+    mcpServerInstance.off('diff:resolved', onDiffResolved);
+    mcpServerInstance.off('agent:connected', onAgentConnected);
+    mcpServerInstance.off('agent:disconnected', onAgentDisconnected);
+  });
+});
+
+// Process Heartbeat
+setInterval(() => {
+  if (mcpServerInstance) {
+    console.log(`[HEARTBEAT] PID: ${process.pid}, Agent Connected: ${!!mcpServerInstance.connectedAgent}, Pending Diffs: ${mcpServerInstance.pendingDiffs.size}`);
+  }
+}, 30000).unref();
+
+app.post('/_agent/respond/:id', express.json(), (req, res) => {
+  const { action } = req.body;
+  const id = req.params.id;
+  console.log(`[AGENT] Received response for diff ${id}: ${action}`);
+  
+  if (!mcpServerInstance) {
+    console.error(`[AGENT] POST /respond/${id} failed: Agent integration not initialized`);
+    return res.status(503).json({ error: 'Agent integration not initialized' });
+  }
+  
+  const success = mcpServerInstance.respondToDiff(id, action);
+  if (success) {
+    console.log(`[AGENT] Successfully resolved diff ${id} with ${action}`);
+    res.status(200).json({ success: true });
+  } else {
+    console.warn(`[AGENT] Failed to resolve diff ${id}: Not found`);
+    res.status(404).json({ success: false, error: 'Diff not found' });
+  }
+});
+
+app.get('/_agent/diff/:id', async (req, res, next) => {
+  if (!mcpServerInstance) return res.status(503).send('Agent integration not initialized');
+  const diff = mcpServerInstance.pendingDiffs.get(req.params.id);
+  
+  if (!diff) {
+    const errorData = {
+      repoId,
+      title: 'Diff Not Found',
+      error: 'The requested diff is no longer available or has been resolved.'
+    };
+    return renderWithLayout('error.html', errorData, dir).then(output => res.status(404).send(output)).catch(next);
+  }
+
+  const data = {
+    repoId,
+    title: 'Review: ' + path.basename(diff.filePath),
+    filePath: diff.filePath,
+    diffId: req.params.id,
+    diffContent: diff.diffContent || '',
+    diffContentJSON: JSON.stringify(diff.diffContent || ''),
+    agentName: mcpServerInstance.connectedAgent ? mcpServerInstance.connectedAgent.name : 'Agent',
+    breadcrumbs: createBreadcrumbs(diff.filePath.replace('/var/www', ''), false)
+  };
+
+  try {
+    const output = await renderWithLayout('diff.html', data, path.dirname(diff.filePath));
+    res.send(output);
+  } catch (e) {
+    next(e);
+  }
+});
+
+app.get('/_agent/status', (req, res) => {
+  if (!mcpServerInstance) return res.json({ connected: false, agentName: null, pendingCount: 0 });
+  res.json({
+    connected: !!mcpServerInstance.connectedAgent,
+    agentName: mcpServerInstance.connectedAgent ? mcpServerInstance.connectedAgent.name : null,
+    pendingCount: mcpServerInstance.pendingDiffs.size
+  });
+});
+
+// FOR TESTING ONLY
+app.__setMCPServer = (s) => { mcpServerInstance = s };
+
 // Main File Handler
 app.get('*', async (req, res, next) => {
   const decodedUrl = decodeURIComponent(req.path)
@@ -698,6 +834,23 @@ if (require.main === module) {
     if (flags.browser) {
       opn(serveURL)
     }
+
+    // Start MCP Server for agent integration
+    mcpServerInstance = new MCPServer({
+      externalPort: process.env.MCP_PORT || 3001,
+      repoPath: process.env.REPO_PATH || dir
+    })
+    mcpServerInstance.start()
+    msg('agent', chalk`{grey listening on port: ${style.port(mcpServerInstance.port)} (external: ${mcpServerInstance.externalPort})}`)
+
+    const cleanup = () => {
+      if (mcpServerInstance) mcpServerInstance.cleanup();
+      process.exit();
+    };
+
+    process.on('SIGINT', cleanup);
+    process.on('SIGTERM', cleanup);
+    process.on('exit', () => mcpServerInstance && mcpServerInstance.cleanup());
   })
 }
 

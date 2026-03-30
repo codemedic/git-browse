@@ -1567,6 +1567,158 @@ html[data-theme="dark"] .change-tree-dismiss-btn      { color: #8b949e; }
 html[data-theme="dark"] .change-tree-file:hover .change-tree-dismiss-btn { opacity: 1; }
 html[data-theme="dark"] .change-tree-dismiss-btn:hover { background: #21262d; color: #f85149; }
 
+/* --- Agent Integration Toast & Badge --- */
+#agent-toasts {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 12px;
+  z-index: 80000;
+  pointer-events: none;
+}
+
+.agent-toast {
+  width: 320px;
+  background: #ffffff;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s, transform 0.3s;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
+.agent-toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.agent-toast-header {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  background: #f6f8fa;
+  border-radius: 7px 7px 0 0;
+  border-bottom: 1px solid #d0d7de;
+  gap: 8px;
+}
+.agent-toast-badge {
+  background: #4a9eff;
+  color: white;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.agent-toast-title {
+  font-weight: 600;
+  color: #57606a;
+}
+
+.agent-toast-body {
+  padding: 12px 10px;
+}
+.agent-toast-file {
+  color: #0969da;
+  text-decoration: none;
+  font-weight: 500;
+  word-break: break-all;
+}
+.agent-toast-file:hover {
+  text-decoration: underline;
+}
+
+.agent-toast-footer {
+  display: flex;
+  padding: 8px 10px;
+  gap: 8px;
+  border-top: 1px solid #f6f8fa;
+}
+.agent-btn {
+  flex: 1;
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid #d0d7de;
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+}
+.agent-btn-approve {
+  color: #1a7f37;
+}
+.agent-btn-approve:hover {
+  background: #f0fff4;
+  border-color: #2da44e;
+}
+.agent-btn-reject {
+  color: #cf222e;
+}
+.agent-btn-reject:hover {
+  background: #fff1f0;
+  border-color: #d73a49;
+}
+
+.agent-badge-btn {
+  color: #8c959f;
+  opacity: 0.5;
+  transition: all 0.2s ease;
+}
+.agent-badge-btn.agent-connected {
+  color: #0969da;
+  opacity: 1;
+}
+.agent-badge-btn.agent-active {
+  animation: agent-pulse 2s infinite;
+}
+@keyframes agent-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); filter: drop-shadow(0 0 4px rgba(9, 105, 218, 0.4)); }
+  100% { transform: scale(1); }
+}
+
+.agent-badge-count {
+  font-size: 10px;
+...  font-weight: bold;
+  background: #cf222e;
+  color: white;
+  border-radius: 8px;
+  padding: 0 4px;
+  min-width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -4px;
+  margin-top: -10px;
+}
+.agent-badge-count:empty { display: none; }
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .agent-toast               { background: #161b22; border-color: var(--dark-border); }
+  html:not([data-theme="light"]) .agent-toast-header        { background: #21262d; border-bottom-color: var(--dark-border); }
+  html:not([data-theme="light"]) .agent-toast-title         { color: var(--dark-text); }
+  html:not([data-theme="light"]) .agent-toast-file          { color: var(--dark-link); }
+  html:not([data-theme="light"]) .agent-btn                 { background: #21262d; border-color: var(--dark-border); }
+  html:not([data-theme="light"]) .agent-btn-approve:hover   { background: #0d2a14; border-color: #3fb950; }
+  html:not([data-theme="light"]) .agent-btn-reject:hover    { background: #2c0d0d; border-color: #f85149; }
+}
+
+html[data-theme="dark"] .agent-toast               { background: #161b22; border-color: var(--dark-border); }
+html[data-theme="dark"] .agent-toast-header        { background: #21262d; border-bottom-color: var(--dark-border); }
+html[data-theme="dark"] .agent-toast-title         { color: var(--dark-text); }
+html[data-theme="dark"] .agent-toast-file          { color: var(--dark-link); }
+html[data-theme="dark"] .agent-btn                 { background: #21262d; border-color: var(--dark-border); }
+html[data-theme="dark"] .agent-btn-approve:hover   { background: #0d2a14; border-color: #3fb950; }
+html[data-theme="dark"] .agent-btn-reject:hover    { background: #2c0d0d; border-color: #f85149; }
+
 /* --- Footer --- */
 .footer {
   margin-top: 48px;

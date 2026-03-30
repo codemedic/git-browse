@@ -4,10 +4,14 @@ services:
     ports:
       - "${PORT:-8080}:8080"
       - "${LIVERELOAD_PORT:-35729}:${LIVERELOAD_PORT:-35729}"
+      - "${MCP_PORT:-3001}:3001"
     volumes:
-      - ${REPO_PATH:-.}:/var/www:ro
+      - "${REPO_PATH:-.}:/var/www:ro"
+      - "${CLAUDE_IDE_DIR:-${HOME}/.claude/ide}:/home/node/.claude/ide"
     environment:
       - GIT_BROWSE_REPO_ID=${GIT_BROWSE_REPO_ID:-}
       - GIT_BROWSE_REPO_NAME=${GIT_BROWSE_REPO_NAME:-}
+      - REPO_PATH=${REPO_PATH:-.}
+      - MCP_PORT=${MCP_PORT:-3001}
     restart: unless-stopped
     stop_grace_period: 1s

@@ -9,7 +9,7 @@
 #   0 - Port is in use
 #   1 - Port is free
 port_in_use() {
-    (echo >/dev/tcp/localhost/"$1") &>/dev/null
+    nc -z localhost "$1" >/dev/null 2>&1
 }
 
 # Open the given URL in the default browser, if possible
@@ -94,9 +94,6 @@ main() {
     log_debug "Resolved server root: $server_root"
     log_debug "Resolved sub-path: $sub_path"
 
-    local url="http://localhost:8080${sub_path}/"
-    log_debug "Initial URL to open: $url"
-
     # Deterministic project name per repo — avoids container conflicts across instances.
     # Align with src/server.js: use root commit hash as the primary differentiator.
     local git_hash
@@ -107,15 +104,16 @@ main() {
     else
         repo_id="$(get_md5_short "$server_root")"
     fi
-    project="git-browse-$repo_id"
+    local project="git-browse-$repo_id"
 
     local -a compose
     compose=(docker compose -p "$project" -f "$compose_path")
 
     # If this repo's container is already running, show its URL and tail logs
     if "${compose[@]}" ps --status running --quiet 2>/dev/null | grep -q .; then
-        local port
-        port=$("${compose[@]}" port git-browse 8080 2>/dev/null | cut -d: -f2)
+        local running_port
+        running_port=$("${compose[@]}" port git-browse 8080 2>/dev/null | cut -d: -f2)
+        local url="http://localhost:$running_port${sub_path}/"
         echo "Already running: $server_root"
         echo "Open:            $url"
         echo "(Ctrl+C to stop)"
@@ -130,17 +128,28 @@ main() {
         port=$((port + 1))
     done
 
+    local url="http://localhost:$port${sub_path}/"
+    log_debug "Initial URL to open: $url"
+
     local livereload_port=35729
     while port_in_use "$livereload_port"; do
         livereload_port=$((livereload_port + 1))
     done
 
+    local mcp_port=3001
+    while port_in_use "$mcp_port"; do
+        mcp_port=$((mcp_port + 1))
+    done
+
     local repo_name
     repo_name="$(basename "$server_root")"
-    export REPO_PATH="$server_root" PORT="$port" LIVERELOAD_PORT="$livereload_port" GIT_BROWSE_REPO_ID="$repo_id" GIT_BROWSE_REPO_NAME="$repo_name"
+    export REPO_PATH="$server_root" PORT="$port" LIVERELOAD_PORT="$livereload_port" MCP_PORT="$mcp_port" GIT_BROWSE_REPO_ID="$repo_id" GIT_BROWSE_REPO_NAME="$repo_name"
+    export CLAUDE_IDE_DIR="${CLAUDE_IDE_DIR:-${HOME}/.claude/ide}"
+    mkdir -p "$CLAUDE_IDE_DIR"
 
     echo "Serving: $server_root"
     echo "Open:    $url"
+    echo "Agent:   ws://localhost:$mcp_port (Claude Code integration)"
 
     "${compose[@]}" up --build -d
     log_debug "Started container for $server_root on port $port (livereload: $livereload_port)"
