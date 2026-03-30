@@ -94,4 +94,42 @@ describe('MCPServer Unit Tests', () => {
     assert.strictEqual(response.result.status, 'FILE_SAVED')
     assert.strictEqual(mcp.pendingDiffs.size, 0)
   })
+
+  test('Intelligent diff generation from new_file_contents', async () => {
+    const testFile = path.join(__dirname, 'diff-test.txt');
+    fs.writeFileSync(testFile, 'line 1\nline 2\nline 3\n');
+    
+    // We need to trick translatePath to return this local file
+    const originalTranslate = mcp.translatePath;
+    mcp.translatePath = () => testFile;
+
+    try {
+      const diffPromise = mcp.server.receive({
+        jsonrpc: '2.0',
+        id: 3,
+        method: 'tools/call',
+        params: {
+          name: 'openDiff',
+          arguments: {
+            path: 'diff-test.txt',
+            new_file_contents: 'line 1\nline 2 MODIFIED\nline 3\n'
+          }
+        }
+      });
+
+      await new Promise(r => setTimeout(r, 50));
+      
+      const pending = Array.from(mcp.pendingDiffs.values())[0];
+      assert.ok(pending.diffContent.includes('-line 2'));
+      assert.ok(pending.diffContent.includes('+line 2 MODIFIED'));
+      // Should NOT include line 1 or 3 as changes
+      assert.ok(!pending.diffContent.includes('-line 1'));
+      
+      mcp.respondToDiff(Array.from(mcp.pendingDiffs.keys())[0], 'approve');
+      await diffPromise;
+    } finally {
+      mcp.translatePath = originalTranslate;
+      if (fs.existsSync(testFile)) fs.unlinkSync(testFile);
+    }
+  })
 })

@@ -4,6 +4,7 @@ const WebSocket = require('ws');
 const { JSONRPCServer } = require('json-rpc-2.0');
 const crypto = require('crypto');
 const EventEmitter = require('events');
+const Diff = require('diff');
 
 class MCPServer extends EventEmitter {
   constructor(options = {}) {
@@ -122,10 +123,23 @@ class MCPServer extends EventEmitter {
       const relPath = path.relative(this.containerPath, filePath);
       
       let diffContent = params.diff;
+      
+      // If we have new contents but no diff, generate a real diff against current disk
       if (!diffContent && params.new_file_contents) {
-        const lines = params.new_file_contents.split('\n');
-        diffContent = `--- ${relPath}\n+++ ${relPath}\n@@ -0,0 +1,${lines.length} @@\n` + 
-                      lines.map(l => '+' + l).join('\n');
+        let oldContent = '';
+        try {
+          if (fs.existsSync(filePath)) {
+            oldContent = fs.readFileSync(filePath, 'utf8');
+            diffContent = Diff.createTwoFilesPatch(relPath, relPath, oldContent, params.new_file_contents, '', '', { context: 3 });
+          } else {
+            // New file: show everything as additions
+            const lines = params.new_file_contents.split('\n');
+            diffContent = `--- /dev/null\n+++ ${relPath}\n@@ -0,0 +1,${lines.length} @@\n` + 
+                          lines.map(l => '+' + l).join('\n');
+          }
+        } catch (e) {
+          console.error('[MCP] Error generating diff against disk:', e);
+        }
       }
 
       if (!diffContent) {
